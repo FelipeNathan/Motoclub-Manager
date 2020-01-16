@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nav_header_height"
+        android:background="@color/black"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark"
+        android:gravity="center_vertical"
+        android:id="@+id/nav_perfil">
+
+    <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="@dimen/nav_header_vertical_spacing"
+            app:srcCompat="@drawable/profile_picture"
+            android:contentDescription="@string/nav_header_desc"
+            android:id="@+id/nav_perfil_image" android:scaleType="centerCrop"/>
+
+    <LinearLayout android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical"
+                  android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="@+id/nav_perfil_image"
+                  app:layout_constraintStart_toStartOf="@+id/nav_perfil_image" android:layout_marginStart="16dp">
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/nav_header_vertical_spacing"
+                android:text="@string/nav_perfil_name"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:id="@+id/nav_perfil_name"
+                android:textColor="@color/white" android:textSize="22sp"/>
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/nav_perfil_motoclube_name"
+                android:id="@+id/nav_perfil_motoclube_name"
+                android:textColor="@color/white"/>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

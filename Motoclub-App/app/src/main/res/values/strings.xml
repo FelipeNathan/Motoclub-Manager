@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name">Motoclub-App</string>
+    <!-- Strings related to login -->
+    <string name="prompt_email">E-mail</string>
+    <string name="prompt_password">Senha</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="background_login">background-login</string>
+    <string name="esqueci_minha_senha">
+        <u>Esqueci minha senha</u>
+    </string>
+    <string name="criar_conta">
+        <u>Criar conta</u>
+    </string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_perfil_name">Capiroto</string>
+    <string name="nav_perfil_motoclube_name">Sol da Liberdade</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Navigation Drawer -->
+    <string name="menu_integrantes">Integrantes</string>
+    <string name="menu_meu_motoclube">Meu Motoclube</string>
+    <string name="menu_motoclubes">Motoclubes</string>
+    <string name="menu_eventos">Eventos</string>
+    <string name="menu_evento_privado">Privado</string>
+    <string name="menu_evento_publico">Público</string>
+    <string name="menu_sair">Sair</string>
+
+    <!-- user -->
+    <string name="nome">Nome</string>
+    <string name="apelido">Apelido</string>
+    <string name="tipo_sanguineo">Tipo Sanguíneo</string>
+    <string name="data_de_nascimento">Data de Nascimento</string>
+    <string name="cargo">Cargo</string>
+    <string name="telefone">Telefone</string>
+    <string name="salvar">Salvar</string>
+
+    <string name="campo_obrigatorio">Este campo é obrigatório</string>
+    <string name="invalid_date">Data está em um formato incorreto</string>
+    <string name="invalid_email">E-mail está em um formato incorreto</string>
+    <string name="invalid_phone">Telefone está em um formato incorreto</string>
+
+    <string name="text_test">Lorem ipsum dolor sit amet, consectetur adipiscing elit</string>
+    <string name="galeria">Galeria</string>
+    <string name="camera">Câmera</string>
+</resources>
