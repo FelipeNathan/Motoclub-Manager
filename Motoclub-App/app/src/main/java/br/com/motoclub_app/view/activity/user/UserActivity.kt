@@ -5,10 +5,14 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.util.Patterns
+import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.view.children
 import br.com.motoclub_app.R
-import br.com.motoclub_app.app.DateUtils
+import br.com.motoclub_app.app.utils.DateUtils
+import br.com.motoclub_app.app.utils.ImageUtils
 import br.com.motoclub_app.model.User
 import br.com.motoclub_app.repository.UserRepository
 import br.com.motoclub_app.type.CargoType
@@ -18,6 +22,8 @@ import br.com.motoclub_app.view.activity.user.contract.UserPresenter
 import br.com.motoclub_app.view.activity.user.contract.UserView
 import br.com.motoclub_app.view.fragment.BottomNavigationFragment
 import com.afollestad.vvalidator.form
+import com.afollestad.vvalidator.form.Form
+import com.afollestad.vvalidator.form.FormResult
 import com.bumptech.glide.Glide
 import com.redmadrobot.inputmask.MaskedTextChangedListener
 import kotlinx.android.synthetic.main.activity_user.*
@@ -29,7 +35,10 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
     }
 
     var isEdit = false
+    var isReadOnly = false
     var imagePath: Uri? = null
+
+    private lateinit var myForm: Form
 
     lateinit var user: User
 
@@ -45,18 +54,75 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
         MaskedTextChangedListener.installOn(activity_user_telefone, "([00]) [00000]-[0000]")
         MaskedTextChangedListener.installOn(activity_user_data_nascimento, "[00]/[00]/[0000]")
 
-        activity_user_add_photo.setOnClickListener {
+        if (isReadOnly) {
 
-            val bottomNav = BottomNavigationFragment()
+            activity_user_add_photo_card.visibility = View.GONE
+            activity_user_btn_salvar.visibility = View.GONE
+            activity_user_password.visibility = View.GONE
 
-            bottomNav.show(supportFragmentManager, bottomNav.tag)
+            activity_user_form.children.forEach {
 
-            bottomNav.onImageSelectedListener {
-
-                updateImage(it)
-                imagePath = it
-                bottomNav.dismiss()
+                if (it !is ImageView)
+                    it.isEnabled = false
             }
+        } else {
+            activity_user_add_photo_card.setOnClickListener {
+
+                val bottomNav = BottomNavigationFragment()
+
+                bottomNav.show(supportFragmentManager, bottomNav.tag)
+
+                bottomNav.onImageSelectedListener {
+
+                    updateImage(it)
+                    imagePath = it
+                    bottomNav.dismiss()
+                }
+            }
+        }
+
+        activity_user_img.setOnClickListener {
+
+            var image =
+            if (imagePath != null) {
+                imagePath.toString()
+            } else {
+                user.imageId
+            }
+
+            image?.let { ImageUtils.openImageViewer(this, it) }
+        }
+
+    }
+
+    private fun salvar() {
+
+        Log.i(TAG, "Validating form")
+        val result = myForm.validate()
+
+        if (result.success()) {
+            Log.i(TAG, "Saving the User")
+            user.apply {
+                nome = activity_user_name.text.toString()
+                apelido = activity_user_apelido.text.toString()
+                tipoSanguineo = activity_user_tipo_sanguineo.selectedItem.toString()
+
+                if (activity_user_data_nascimento.text.toString().isNotBlank())
+                    nascimento = DateUtils.stringToCalendar(activity_user_data_nascimento.text.toString())
+
+                cargo = CargoType.values()[activity_user_cargo.selectedItemPosition]
+                telefone = activity_user_telefone.text.toString()
+                email = activity_user_email.text.toString()
+                password = activity_user_password.text.toString()
+
+                imagePath?.apply {
+                    imageId = this.toString()
+                }
+            }
+            presenter.salvar(user)
+        } else {
+
+            Log.i(TAG, result.errors().toString())
         }
     }
 
@@ -79,7 +145,7 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
 
     private fun initFormValidation() {
 
-        val myForm = form {
+        myForm = form {
             inputLayout(R.id.input_layout_name) {
                 isNotEmpty().description(getString(R.string.campo_obrigatorio))
             }
@@ -107,42 +173,11 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
             }
         }
 
-        activity_user_btn_salvar.setOnClickListener {
-
-            Log.i(TAG, "Validating form")
-            val result = myForm.validate()
-
-            if (result.success()) {
-                Log.i(TAG, "Saving the User")
-                user.apply {
-                    id = 1
-                    nome = activity_user_name.text.toString()
-                    apelido = activity_user_apelido.text.toString()
-                    tipoSanguineo = activity_user_tipo_sanguineo.selectedItem.toString()
-
-                    if (activity_user_data_nascimento.text.toString().isNotBlank())
-                        nascimento = DateUtils.stringToCalendar(activity_user_data_nascimento.text.toString())
-
-                    cargo = CargoType.values()[activity_user_cargo.selectedItemPosition]
-                    telefone = activity_user_telefone.text.toString()
-                    email = activity_user_email.text.toString()
-                    password = activity_user_password.text.toString()
-
-                    imagePath?.apply {
-                        imageId = this.toString()
-                    }
-                }
-                presenter.salvar(user)
-            } else {
-
-                Log.i(TAG, result.errors().toString())
-            }
-        }
+        activity_user_btn_salvar.setOnClickListener { salvar() }
     }
 
     private fun initUser() {
 
-        isEdit = false
         intent.extras?.apply {
 
             Log.i(TAG, "Have extras")
@@ -181,6 +216,10 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
                 }
 
             }
+
+            if (this.containsKey("readOnly")) {
+                isReadOnly = this.getBoolean("readOnly")
+            }
         }
 
         if (!::user.isInitialized)
@@ -209,11 +248,6 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
     }
 
     private fun updateImage(uri: Uri?) {
-        Glide.with(this)
-            .load(uri)
-            .centerCrop()
-            .placeholder(R.drawable.profile_picture)
-            .error(R.drawable.profile_picture)
-            .into(activity_user_img)
+        ImageUtils.loadImage(this, uri.toString(), activity_user_img)
     }
 }

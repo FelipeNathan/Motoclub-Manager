@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import br.com.motoclub_app.app.Permissions
+import com.google.gson.Gson
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -29,5 +30,10 @@ abstract class AppModule {
         @Provides
         @Singleton
         fun providePermissions(context: Context) = Permissions(context)
+
+        @JvmStatic
+        @Provides
+        @Singleton
+        fun provideGson() = Gson()
     }
 }

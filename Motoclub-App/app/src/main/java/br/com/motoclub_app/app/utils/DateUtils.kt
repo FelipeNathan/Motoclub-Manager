@@ -1,4 +1,4 @@
-package br.com.motoclub_app.app
+package br.com.motoclub_app.app.utils
 
 import java.text.SimpleDateFormat
 import java.util.*
@@ -17,11 +17,11 @@ class DateUtils {
             val date = uiFormat.parse(str)
             val calendar = Calendar.getInstance()
 
-            calendar.time = date
+            calendar.time = date!!
 
             return calendar
         }
 
-        fun calendarToImageName(calendar: Calendar) = imgNameFormat.format(calendar.time)
+        fun calendarToImageName(calendar: Calendar): String = imgNameFormat.format(calendar.time)
     }
 }

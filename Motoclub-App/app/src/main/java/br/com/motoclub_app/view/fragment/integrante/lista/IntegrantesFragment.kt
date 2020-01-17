@@ -31,7 +31,8 @@ class IntegrantesFragment : BaseFragment<IntegrantesPresenter>(), IntegrantesVie
 
         presenter.loadIntegrantes()
 
-        list_fab.setOnClickListener { startActivity(Intent(view.context, UserActivity::class.java))}
+        refresh_layout.setOnRefreshListener { presenter.loadIntegrantes() }
+        list_fab.setOnClickListener { startActivity(Intent(view.context, UserActivity::class.java)) }
     }
 
     override fun setTitle() {
@@ -39,10 +40,21 @@ class IntegrantesFragment : BaseFragment<IntegrantesPresenter>(), IntegrantesVie
     }
 
     override fun onLoadIntegrantes(integrantes: MutableList<Item>) {
+
         val adapter = ListAdapter(integrantes)
+
+        adapter.onItemClickListener = {
+
+            val userIntent = Intent(context, UserActivity::class.java)
+            userIntent.putExtra("id", it.id)
+            userIntent.putExtra("readOnly", true)
+            startActivity(userIntent)
+        }
 
         val recyclerView = view?.findViewById<RecyclerView>(R.id.recycler_list)
         recyclerView?.adapter = adapter
         recyclerView?.layoutManager = LinearLayoutManager(view?.context)
+
+        refresh_layout.isRefreshing = false
     }
 }

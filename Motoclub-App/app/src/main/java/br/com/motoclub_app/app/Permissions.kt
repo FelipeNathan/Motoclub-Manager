@@ -20,10 +20,10 @@ class Permissions @Inject constructor(val context: Context) {
         permissionsToRequest.add(Manifest.permission.CAMERA)
     }
 
-    fun addWriteStoragePermission() {
+    fun addStoragePermission() {
         permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
     }
-
 
     fun validateAndRequestPermission(activity: Activity) {
 
@@ -42,6 +42,8 @@ class Permissions @Inject constructor(val context: Context) {
                 permissions.toTypedArray(),
                 ActivityRequestCodeType.REQUEST_PERMISSION
             )
+
+            permissionsToRequest.clear()
         }
     }
 }

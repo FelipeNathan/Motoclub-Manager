@@ -22,7 +22,7 @@ class LoginPresenterImpl @Inject constructor(private val view: LoginView) : Logi
         if (user == null) {
             view.showMessage("Usuário não encontrado")
         } else {
-            repository.setUser(user)
+            repository.setCache(user)
             view.onLogin()
         }
     }

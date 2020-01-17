@@ -12,6 +12,7 @@ import br.com.motoclub_app.view.fragment.Item
 import br.com.motoclub_app.view.fragment.ListAdapter
 import br.com.motoclub_app.view.fragment.motoclube.lista.contract.MotoclubesPresenter
 import br.com.motoclub_app.view.fragment.motoclube.lista.contract.MotoclubesView
+import kotlinx.android.synthetic.main.fragment_list.*
 
 class MotoclubesFragment : BaseFragment<MotoclubesPresenter>(), MotoclubesView {
 
@@ -25,6 +26,10 @@ class MotoclubesFragment : BaseFragment<MotoclubesPresenter>(), MotoclubesView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         presenter.loadMotoclubes()
+
+        refresh_layout.setOnRefreshListener {
+            presenter.loadMotoclubes()
+        }
     }
 
     override fun setTitle() {
@@ -38,5 +43,7 @@ class MotoclubesFragment : BaseFragment<MotoclubesPresenter>(), MotoclubesView {
         val recyclerView = view?.findViewById<RecyclerView>(R.id.recycler_list)
         recyclerView?.adapter = adapter
         recyclerView?.layoutManager = LinearLayoutManager(view?.context)
+
+        refresh_layout.isRefreshing = false
     }
 }

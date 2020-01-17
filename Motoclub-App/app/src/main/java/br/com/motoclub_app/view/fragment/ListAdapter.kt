@@ -1,6 +1,6 @@
 package br.com.motoclub_app.view.fragment
 
-import android.content.Context
+import android.app.Activity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,9 +8,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import br.com.motoclub_app.R
-import com.bumptech.glide.Glide
+import br.com.motoclub_app.app.utils.ImageUtils
+
 
 class ListAdapter(private val items: MutableList<Item>) : RecyclerView.Adapter<ListAdapter.ViewHolder>() {
+
+    var onItemClickListener: (item: Item) -> Unit = { }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
@@ -30,18 +33,14 @@ class ListAdapter(private val items: MutableList<Item>) : RecyclerView.Adapter<L
 
         val item = items[position]
 
+        holder.itemView.setOnClickListener { onItemClickListener(item) }
+
         holder.mainInfo.text = item.mainInfo
         holder.subInfo.text = item.subInfo
         holder.subInfo2.text = item.subInfo2
 
         item.image?.apply {
-            Glide
-                .with(holder.itemView.context)
-                .load(this)
-                .centerCrop()
-                .placeholder(R.drawable.profile_picture)
-                .error(R.drawable.profile_picture)
-                .into(holder.image)
+            ImageUtils.loadImage(holder.itemView.context as Activity, this, holder.image)
         }
     }
 

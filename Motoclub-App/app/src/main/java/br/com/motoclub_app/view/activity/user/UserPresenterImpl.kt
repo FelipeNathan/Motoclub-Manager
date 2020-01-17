@@ -7,7 +7,7 @@ import br.com.motoclub_app.repository.UserRepository
 import java.lang.Exception
 import javax.inject.Inject
 
-class UserPresenterImpl @Inject constructor(val view: UserView): UserPresenter {
+class UserPresenterImpl @Inject constructor(val view: UserView) : UserPresenter {
 
     @Inject
     lateinit var userRepository: UserRepository
@@ -19,8 +19,11 @@ class UserPresenterImpl @Inject constructor(val view: UserView): UserPresenter {
             if (user.id == null)
                 validateOnSave(user)
 
-            userRepository.addUser(user)
-            userRepository.setUser(user)
+            userRepository.save(user)
+
+            if (UserRepository.loggedUser == null)
+                userRepository.setCache(user)
+
             view.onSalvar()
 
         } catch (e: Exception) {
@@ -35,5 +38,13 @@ class UserPresenterImpl @Inject constructor(val view: UserView): UserPresenter {
 
     }
 
-    override fun loadById(id: Long) = userRepository.loadById(id)
+    override fun loadById(id: Long): User {
+        val user = userRepository.findById(id)
+
+        user?.apply {
+            return@loadById this
+        }
+
+        throw Exception("Usuário não encontrado")
+    }
 }

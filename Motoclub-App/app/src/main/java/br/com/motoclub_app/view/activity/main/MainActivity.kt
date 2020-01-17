@@ -10,11 +10,13 @@ import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.FileProvider
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import br.com.motoclub_app.R
 import br.com.motoclub_app.app.Permissions
+import br.com.motoclub_app.app.utils.ImageUtils
 import br.com.motoclub_app.repository.UserRepository
 import br.com.motoclub_app.type.EventType
 import br.com.motoclub_app.view.activity.BaseActivity
@@ -25,7 +27,9 @@ import br.com.motoclub_app.view.activity.user.UserActivity
 import br.com.motoclub_app.view.fragment.evento.lista.EventosFragment
 import br.com.motoclub_app.view.fragment.integrante.lista.IntegrantesFragment
 import br.com.motoclub_app.view.fragment.motoclube.lista.MotoclubesFragment
+import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
+import java.io.File
 import javax.inject.Inject
 
 class MainActivity : BaseActivity<MainPresenter>(), MainView, NavigationView.OnNavigationItemSelectedListener {
@@ -53,7 +57,6 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView, NavigationView.OnN
         val navView: NavigationView = findViewById(R.id.nav_view)
         navView.setNavigationItemSelectedListener(this)
 
-        // configureUserHeader(navView)
         requestPermissions()
 
         val fragment: Fragment = if (UserRepository.loggedUser?.motoclube == null) MotoclubesFragment() else IntegrantesFragment()
@@ -105,7 +108,7 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView, NavigationView.OnN
 
     private fun requestPermissions() {
         permissions.addCameraPermission()
-        permissions.addWriteStoragePermission()
+        permissions.addStoragePermission()
         permissions.validateAndRequestPermission(this)
     }
 
@@ -121,11 +124,17 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView, NavigationView.OnN
             }
 
             user.imageId?.let { image ->
-                headerView.findViewById<ImageView>(R.id.nav_perfil_image).setImageURI(Uri.parse(image))
+                ImageUtils.loadImage(this, image, headerView.findViewById(R.id.nav_perfil_image))
             }
 
-
             headerView.findViewById<ConstraintLayout>(R.id.nav_perfil).setOnClickListener {
+
+                UserRepository.loggedUser!!.imageId?.let {
+                    ImageUtils.openImageViewer(this, it)
+                }
+            }
+
+            headerView.findViewById<ImageView>(R.id.nav_perfil_edit).setOnClickListener {
                 val userIntent = Intent(this, UserActivity::class.java)
                 userIntent.putExtra("id", user.id)
                 startActivity(userIntent)

@@ -2,7 +2,6 @@ package br.com.motoclub_app.view.fragment
 
 import android.Manifest
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -17,13 +16,12 @@ import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import br.com.motoclub_app.R
-import br.com.motoclub_app.app.DateUtils
+import br.com.motoclub_app.app.utils.DateUtils
 import br.com.motoclub_app.type.ActivityRequestCodeType
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.io.File
-import java.text.DateFormat
 import java.util.*
 
 class BottomNavigationFragment : BottomSheetDialogFragment() {
@@ -55,7 +53,7 @@ class BottomNavigationFragment : BottomSheetDialogFragment() {
         view.findViewById<LinearLayout>(R.id.gallery_icon_dialog).setOnClickListener {
             val intent = Intent()
             intent.type = "image/*"
-            intent.action = Intent.ACTION_GET_CONTENT
+            intent.action = Intent.ACTION_OPEN_DOCUMENT
             startActivityForResult(intent, ActivityRequestCodeType.SELECT_IMAGE)
         }
 
@@ -67,7 +65,6 @@ class BottomNavigationFragment : BottomSheetDialogFragment() {
             camera.setOnClickListener {
                 openCamera()
             }
-
         }
     }
 
