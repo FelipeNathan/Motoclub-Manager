@@ -28,7 +28,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingTop="@dimen/nav_header_vertical_spacing"
-                android:text="@string/nav_perfil_name"
+                android:text=""
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:id="@+id/nav_perfil_name"
                 android:textColor="@color/white" android:textSize="22sp"/>
@@ -36,13 +36,14 @@
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/nav_perfil_motoclube_name"
+                android:text=""
                 android:id="@+id/nav_perfil_motoclube_name"
                 android:textColor="@color/white"/>
     </LinearLayout>
     <ImageView
             android:layout_width="50dp"
-            android:layout_height="50dp" app:srcCompat="@drawable/ic_edit"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_edit"
             android:id="@+id/nav_perfil_edit" app:layout_constraintEnd_toEndOf="@+id/nav_perfil_image"
             android:layout_marginEnd="16dp" android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent" android:paddingLeft="20dp" android:paddingTop="20dp"/>

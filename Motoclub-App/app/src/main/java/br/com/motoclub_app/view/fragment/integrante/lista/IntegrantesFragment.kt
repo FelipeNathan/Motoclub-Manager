@@ -14,7 +14,6 @@ import br.com.motoclub_app.view.fragment.Item
 import br.com.motoclub_app.view.fragment.ListAdapter
 import br.com.motoclub_app.view.fragment.integrante.lista.contract.IntegrantesPresenter
 import br.com.motoclub_app.view.fragment.integrante.lista.contract.IntegrantesView
-import com.afollestad.vvalidator.form
 import kotlinx.android.synthetic.main.fragment_list.*
 
 class IntegrantesFragment : BaseFragment<IntegrantesPresenter>(), IntegrantesView {
@@ -29,10 +28,13 @@ class IntegrantesFragment : BaseFragment<IntegrantesPresenter>(), IntegrantesVie
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        presenter.loadIntegrantes()
-
         refresh_layout.setOnRefreshListener { presenter.loadIntegrantes() }
         list_fab.setOnClickListener { startActivity(Intent(view.context, UserActivity::class.java)) }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        presenter.loadIntegrantes()
     }
 
     override fun setTitle() {
@@ -45,10 +47,10 @@ class IntegrantesFragment : BaseFragment<IntegrantesPresenter>(), IntegrantesVie
 
         adapter.onItemClickListener = {
 
-            val userIntent = Intent(context, UserActivity::class.java)
-            userIntent.putExtra("id", it.id)
-            userIntent.putExtra("readOnly", true)
-            startActivity(userIntent)
+            val intent = Intent(context, UserActivity::class.java)
+            intent.putExtra("id", it.id)
+            intent.putExtra("readOnly", true)
+            startActivity(intent)
         }
 
         val recyclerView = view?.findViewById<RecyclerView>(R.id.recycler_list)

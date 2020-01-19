@@ -11,11 +11,12 @@
     <string name="criar_conta">
         <u>Criar conta</u>
     </string>
+
     <string name="title_activity_main">MainActivity</string>
+
+    <!-- Header Navigation -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_perfil_name">Capiroto</string>
-    <string name="nav_perfil_motoclube_name">Sol da Liberdade</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
@@ -45,4 +46,6 @@
     <string name="text_test">Lorem ipsum dolor sit amet, consectetur adipiscing elit</string>
     <string name="galeria">Galeria</string>
     <string name="camera">Câmera</string>
+    <string name="data_de_fundacao">Data de fundação</string>
+    <string name="presidente">Presidente</string>
 </resources>

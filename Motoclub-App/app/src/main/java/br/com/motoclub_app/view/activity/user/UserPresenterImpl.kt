@@ -39,7 +39,7 @@ class UserPresenterImpl @Inject constructor(val view: UserView) : UserPresenter 
     }
 
     override fun loadById(id: Long): User {
-        val user = userRepository.findById(id)
+        val user : User? = userRepository.findById(id)
 
         user?.apply {
             return@loadById this

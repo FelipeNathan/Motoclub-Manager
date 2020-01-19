@@ -17,42 +17,63 @@ import br.com.motoclub_app.model.User
 import br.com.motoclub_app.repository.UserRepository
 import br.com.motoclub_app.type.CargoType
 import br.com.motoclub_app.view.activity.BaseActivity
+import br.com.motoclub_app.view.activity.login.LoginActivity
 import br.com.motoclub_app.view.activity.main.MainActivity
 import br.com.motoclub_app.view.activity.user.contract.UserPresenter
 import br.com.motoclub_app.view.activity.user.contract.UserView
 import br.com.motoclub_app.view.fragment.BottomNavigationFragment
 import com.afollestad.vvalidator.form
 import com.afollestad.vvalidator.form.Form
-import com.afollestad.vvalidator.form.FormResult
-import com.bumptech.glide.Glide
 import com.redmadrobot.inputmask.MaskedTextChangedListener
 import kotlinx.android.synthetic.main.activity_user.*
 
 class UserActivity : BaseActivity<UserPresenter>(), UserView {
 
-    companion object {
-        val TAG = UserActivity::class.java.simpleName
-    }
-
-    var isEdit = false
-    var isReadOnly = false
-    var imagePath: Uri? = null
-
     private lateinit var myForm: Form
+    private lateinit var tipoSanguineoAdapter: ArrayAdapter<String>
 
     lateinit var user: User
+
+    private var isEdit = false
+    private var isReadOnly = false
+    private var imagePath: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user)
 
-        initForm()
-        initUser()
-        initFormValidation()
+        intent.extras?.apply {
+            if (this.containsKey("readOnly")) {
+                isReadOnly = this.getBoolean("readOnly")
+            }
+        }
 
-        MaskedTextChangedListener.installOn(activity_user_telefone, "([00]) [00000]-[0000]")
-        MaskedTextChangedListener.installOn(activity_user_data_nascimento, "[00]/[00]/[0000]")
+        initForm()
+        initData()
+        initFormValidation()
+        initListeners()
+    }
+
+    private fun initForm() {
+
+        val cargosAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            CargoType.values().map { c -> c.description })
+
+        cargosAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        activity_user_cargo.adapter = cargosAdapter
+        activity_user_cargo.setSelection(CargoType.values().indexOf(CargoType.INT))
+
+        tipoSanguineoAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            arrayOf("A-", "A+", "B-", "B+", "AB-", "AB+", "O-", "O+")
+        )
+
+        tipoSanguineoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        activity_user_tipo_sanguineo.adapter = tipoSanguineoAdapter
 
         if (isReadOnly) {
 
@@ -65,7 +86,98 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
                 if (it !is ImageView)
                     it.isEnabled = false
             }
-        } else {
+        }
+    }
+
+    private fun initData() {
+
+        intent.extras?.apply {
+
+            Log.i(TAG, "Have extras")
+            if (this.containsKey("id")) {
+
+                isEdit = true
+                activity_user_email.isEnabled = false
+
+                Log.i(TAG, "Have an ID Extra")
+                val userId = getLong("id")
+
+                user = if (UserRepository.loggedUser!!.id == userId) {
+                    Log.i(TAG, "The ID is of the Logged User")
+                    UserRepository.loggedUser!!
+                } else {
+                    Log.i(TAG, "Loading user from repository")
+                    presenter.loadById(userId)
+                }
+
+                activity_user_name.setText(user.nome)
+                activity_user_apelido.setText(user.apelido)
+
+                activity_user_tipo_sanguineo.setSelection(tipoSanguineoAdapter.getPosition(user.tipoSanguineo))
+                activity_user_cargo.setSelection(CargoType.values().indexOf(user.cargo))
+                activity_user_telefone.setText(user.telefone)
+                activity_user_email.setText(user.email)
+                activity_user_password.setText(user.password)
+
+                user.nascimento?.let { activity_user_data_nascimento.setText(DateUtils.calendarToString(it)) }
+                user.imageId?.let { updateImage(Uri.parse(it)) }
+
+            }
+        }
+
+        if (!::user.isInitialized)
+            user = User()
+    }
+
+    private fun initFormValidation() {
+
+        myForm = form {
+            inputLayout(R.id.input_layout_name) {
+                isNotEmpty().description(getString(R.string.campo_obrigatorio))
+            }
+
+            inputLayout(R.id.input_layout_data_nascimento) {
+
+                conditional({ activity_user_data_nascimento.text.toString().isNotBlank() }) {
+                    matches("^\\d{2}/\\d{2}/\\d{4}$").description(getString(R.string.invalid_date))
+                }
+            }
+
+            inputLayout(R.id.input_layout_telefone) {
+
+                conditional({ activity_user_telefone.text.toString().isNotBlank() }) {
+                    matches("""^(\(\d{2}\))? \d{5}-\d{4}$""").description(getString(R.string.invalid_phone))
+                }
+            }
+
+            inputLayout(R.id.input_layout_email) {
+                matches(Patterns.EMAIL_ADDRESS.toString()).description(getString(R.string.invalid_email))
+            }
+
+            inputLayout(R.id.input_layout_password) {
+                isNotEmpty().description(getString(R.string.campo_obrigatorio))
+            }
+        }
+    }
+
+    private fun initListeners() {
+
+        MaskedTextChangedListener.installOn(activity_user_telefone, "([00]) [00000]-[0000]")
+        MaskedTextChangedListener.installOn(activity_user_data_nascimento, "[00]/[00]/[0000]")
+
+        activity_user_img.setOnClickListener {
+
+            val image =
+                if (imagePath != null) {
+                    imagePath.toString()
+                } else {
+                    user.imageId
+                }
+
+            image?.let { ImageUtils.openImageViewer(this, it) }
+        }
+
+        if (!isReadOnly) {
             activity_user_add_photo_card.setOnClickListener {
 
                 val bottomNav = BottomNavigationFragment()
@@ -81,18 +193,7 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
             }
         }
 
-        activity_user_img.setOnClickListener {
-
-            var image =
-            if (imagePath != null) {
-                imagePath.toString()
-            } else {
-                user.imageId
-            }
-
-            image?.let { ImageUtils.openImageViewer(this, it) }
-        }
-
+        activity_user_btn_salvar.setOnClickListener { salvar() }
     }
 
     private fun salvar() {
@@ -128,6 +229,7 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
 
     override fun onSalvar() {
 
+
         if (isEdit) {
             Log.i(TAG, "Is editting, so just back to who called this activity")
             super.onBackPressed()
@@ -143,111 +245,11 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
         Toast.makeText(this, msg ?: "Houve um erro ao salvar", Toast.LENGTH_LONG).show()
     }
 
-    private fun initFormValidation() {
-
-        myForm = form {
-            inputLayout(R.id.input_layout_name) {
-                isNotEmpty().description(getString(R.string.campo_obrigatorio))
-            }
-
-            inputLayout(R.id.input_layout_data_nascimento) {
-
-                conditional({ activity_user_data_nascimento.text!!.isNotBlank() }) {
-                    matches("^\\d{2}/\\d{2}/\\d{4}$").description(getString(R.string.invalid_date))
-                }
-            }
-
-            inputLayout(R.id.input_layout_telefone) {
-
-                conditional({ activity_user_telefone.text!!.isNotBlank() }) {
-                    matches("""^(\(\d{2}\))? \d{5}-\d{4}$""").description(getString(R.string.invalid_phone))
-                }
-            }
-
-            inputLayout(R.id.input_layout_email) {
-                matches(Patterns.EMAIL_ADDRESS.toString()).description(getString(R.string.invalid_email))
-            }
-
-            inputLayout(R.id.input_layout_password) {
-                isNotEmpty().description(getString(R.string.campo_obrigatorio))
-            }
-        }
-
-        activity_user_btn_salvar.setOnClickListener { salvar() }
-    }
-
-    private fun initUser() {
-
-        intent.extras?.apply {
-
-            Log.i(TAG, "Have extras")
-            if (this.containsKey("id")) {
-
-                isEdit = true
-                activity_user_email.isEnabled = false
-
-                Log.i(TAG, "Have an ID Extra")
-                val userId = getLong("id")
-
-                user = if (UserRepository.loggedUser!!.id == userId) {
-                    Log.i(TAG, "The ID is of the Logged User")
-                    UserRepository.loggedUser!!
-                } else {
-                    Log.i(TAG, "Loading user from repository")
-                    presenter.loadById(userId)
-                }
-
-                activity_user_name.setText(user.nome)
-                activity_user_apelido.setText(user.apelido)
-                activity_user_tipo_sanguineo.setSelection(
-                    (activity_user_tipo_sanguineo.adapter as ArrayAdapter<String>).getPosition(
-                        user.tipoSanguineo
-                    )
-                )
-                activity_user_cargo.setSelection(CargoType.values().indexOf(user.cargo))
-                activity_user_telefone.setText(user.telefone)
-                activity_user_email.setText(user.email)
-                activity_user_password.setText(user.password)
-
-                user.nascimento?.apply { activity_user_data_nascimento.setText(DateUtils.calendarToString(this)) }
-
-                user.imageId?.let {
-                    updateImage(Uri.parse(it))
-                }
-
-            }
-
-            if (this.containsKey("readOnly")) {
-                isReadOnly = this.getBoolean("readOnly")
-            }
-        }
-
-        if (!::user.isInitialized)
-            user = User()
-    }
-
-    private fun initForm() {
-
-        val cargosAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_item,
-            CargoType.values().map { c -> c.description })
-
-        cargosAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        activity_user_cargo.adapter = cargosAdapter
-        activity_user_cargo.setSelection(CargoType.values().indexOf(CargoType.INT))
-
-        val tipoSanguineoAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_item,
-            arrayOf("A-", "A+", "B-", "B+", "AB-", "AB+", "O-", "O+")
-        )
-
-        tipoSanguineoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        activity_user_tipo_sanguineo.adapter = tipoSanguineoAdapter
-    }
-
     private fun updateImage(uri: Uri?) {
         ImageUtils.loadImage(this, uri.toString(), activity_user_img)
+    }
+
+    companion object {
+        val TAG = UserActivity::class.java.simpleName
     }
 }
