@@ -1,5 +1,7 @@
 package br.com.motoclub_app.view.fragment.motoclube.lista
 
+import android.os.Handler
+import br.com.motoclub_app.interactor.MotoclubeInteractor
 import br.com.motoclub_app.repository.MotoclubeRepository
 import br.com.motoclub_app.view.fragment.Item
 import br.com.motoclub_app.view.fragment.motoclube.lista.contract.MotoclubesFragmentPresenter
@@ -12,8 +14,10 @@ class MotoclubesFragmentPresenterImpl @Inject constructor(val view: MotoclubesFr
     @Inject
     lateinit var motoclubeRepository: MotoclubeRepository
 
-    override fun loadMotoclubes() {
+    @Inject
+    lateinit var interactor: MotoclubeInteractor
 
+    override fun loadMotoclubes() {
 
         val items = mutableListOf<Item>()
 
@@ -31,5 +35,19 @@ class MotoclubesFragmentPresenterImpl @Inject constructor(val view: MotoclubesFr
         }
 
         view.onLoadMotoclubes(items)
+    }
+
+    override fun solicitarEntrada(mcId: Long) {
+
+        try {
+            interactor.requestEntrance(mcId)
+
+            Handler().postDelayed({
+                view.onSolicitarEntrada()
+            }, 500)
+
+        } catch (ex: Exception) {
+            view.showError(ex.message)
+        }
     }
 }

@@ -145,7 +145,7 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView, NavigationView.OnN
 
     private fun configureMenu(navView: NavigationView) {
         UserRepository.loggedUser!!.let { user ->
-            navView.menu.findItem(R.id.nav_meu_motoclube).isVisible = (user.imageId != null)
+            navView.menu.findItem(R.id.nav_meu_motoclube).isVisible = (user.motoclubeId != null)
         }
     }
 

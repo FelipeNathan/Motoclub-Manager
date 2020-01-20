@@ -48,4 +48,5 @@
     <string name="camera">Câmera</string>
     <string name="data_de_fundacao">Data de fundação</string>
     <string name="presidente">Presidente</string>
+    <string name="solicitar_entrada">Solicitar entrada</string>
 </resources>

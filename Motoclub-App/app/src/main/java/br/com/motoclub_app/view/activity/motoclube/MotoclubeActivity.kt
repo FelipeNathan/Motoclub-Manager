@@ -3,9 +3,13 @@ package br.com.motoclub_app.view.activity.motoclube
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.children
 import br.com.motoclub_app.R
 import br.com.motoclub_app.app.utils.DateUtils
@@ -39,10 +43,33 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
             }
         }
 
+        title = "Cadastro de Motoclube"
+
+        setSupportActionBar(motoclube_toolbar)
+
         initForm()
         initData()
         initFormValidation()
         initListeners()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.motoclube_menu, menu)
+
+        if (UserRepository.loggedUser!!.motoclubeId == null) {
+            menu?.findItem(R.id.motoclube_menu_sair)?.isVisible = false
+        }
+
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        when (item.itemId) {
+            // R.id.motoclube_menu_integrantes ->
+            R.id.motoclube_menu_sair -> presenter.sair()
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun initForm() {
@@ -54,17 +81,21 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
 
             activity_motoclube_form.children.forEach {
 
-                if (it !is ImageView)
+                if (it !is ImageView && it !is Button)
                     it.isEnabled = false
             }
-        }
 
+            if (UserRepository.loggedUser!!.motoclubeId == null) {
+                activity_motoclube_btn_solicitar_entrada.visibility = View.VISIBLE
+            }
+        }
 
         if (!isEdit) {
 
             // Novo cadastro não há integrantes, portanto quem cria será o presidente até editar e adicionar mais integrantes
             if (activity_motoclube_presidente.text.toString().isEmpty()) {
-                val nomePresidente = UserRepository.loggedUser!!.apelido ?: UserRepository.loggedUser!!.nome
+                val nomePresidente =
+                    UserRepository.loggedUser!!.apelido ?: UserRepository.loggedUser!!.nome
                 activity_motoclube_presidente.setText(nomePresidente)
             }
             activity_motoclube_presidente.isEnabled = false
@@ -87,14 +118,23 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
 
                 activity_motoclube_name.setText(motoclube.nome)
 
-                val presidenteName = motoclube.presidente?.apelido ?: motoclube.presidente?.nome ?: ""
+                val presidenteName =
+                    motoclube.presidente?.apelido ?: motoclube.presidente?.nome ?: ""
                 activity_motoclube_presidente.setText(presidenteName)
 
-                motoclube.dataFundacao?.let { activity_motoclube_fundacao.setText(DateUtils.calendarToString(it)) }
+                motoclube.dataFundacao?.let {
+                    activity_motoclube_fundacao.setText(
+                        DateUtils.calendarToString(
+                            it
+                        )
+                    )
+                }
 
                 motoclube.imageId?.let {
                     updateImage(Uri.parse(it))
                 }
+
+                title = "MC ${motoclube.nome}"
             }
         }
 
@@ -147,6 +187,10 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
             }
         }
 
+        activity_motoclube_btn_solicitar_entrada.setOnClickListener {
+            presenter.solicitarEntrada(motoclube.id!!)
+        }
+
         MaskedTextChangedListener.installOn(activity_motoclube_fundacao, "[00]/[00]/[0000]")
         activity_motoclube_btn_salvar.setOnClickListener { salvar() }
     }
@@ -162,7 +206,8 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
                 presidente = UserRepository.loggedUser!!
 
                 if (activity_motoclube_fundacao.text.toString().isNotBlank()) {
-                    dataFundacao = DateUtils.stringToCalendar(activity_motoclube_fundacao.text.toString())
+                    dataFundacao =
+                        DateUtils.stringToCalendar(activity_motoclube_fundacao.text.toString())
                 }
 
                 imagePath?.apply {

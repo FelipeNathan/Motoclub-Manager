@@ -59,4 +59,7 @@ dependencies {
     //Glide - Carregador de Imagens
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     kapt 'com.github.bumptech.glide:compiler:4.11.0'
+
+    //Swipe Layout
+    implementation "com.daimajia.swipelayout:library:1.2.0@aar"
 }

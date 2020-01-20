@@ -17,14 +17,9 @@
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
-            android:requestLegacyExternalStorage="true"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".view.activity.motoclube.MotoclubeActivity">
-        </activity>
-        <activity android:name=".view.activity.MotoclubeActivity">
-        </activity>
         <activity
                 android:name=".view.activity.login.LoginActivity"
                 android:screenOrientation="portrait"
@@ -38,6 +33,7 @@
         </activity>
         <activity android:name=".view.activity.main.MainActivity"/>
         <activity android:name=".view.activity.user.UserActivity"/>
+        <activity android:name=".view.activity.motoclube.MotoclubeActivity"/>
 
         <provider
                 android:name="androidx.core.content.FileProvider"

@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import br.com.motoclub_app.R
@@ -15,6 +17,7 @@ import br.com.motoclub_app.view.fragment.Item
 import br.com.motoclub_app.view.fragment.ListAdapter
 import br.com.motoclub_app.view.fragment.motoclube.lista.contract.MotoclubesFragmentPresenter
 import br.com.motoclub_app.view.fragment.motoclube.lista.contract.MotoclubesFragmentView
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_list.*
 
 class MotoclubesFragment : BaseFragment<MotoclubesFragmentPresenter>(), MotoclubesFragmentView {
@@ -30,7 +33,14 @@ class MotoclubesFragment : BaseFragment<MotoclubesFragmentPresenter>(), Motoclub
         super.onViewCreated(view, savedInstanceState)
 
         refresh_layout.setOnRefreshListener { presenter.loadMotoclubes() }
-        list_fab.setOnClickListener { startActivity(Intent(view.context, MotoclubeActivity::class.java)) }
+        list_fab.setOnClickListener {
+            startActivity(
+                Intent(
+                    view.context,
+                    MotoclubeActivity::class.java
+                )
+            )
+        }
     }
 
     override fun onResume() {
@@ -38,9 +48,16 @@ class MotoclubesFragment : BaseFragment<MotoclubesFragmentPresenter>(), Motoclub
 
         presenter.loadMotoclubes()
 
-        UserRepository.loggedUser?.motoclubeId?.apply {
+        if (UserRepository.loggedUser?.motoclubeId == null) {
+
+            if (!list_fab.isVisible)
+                list_fab.show()
+        } else {
+
             list_fab.hide()
         }
+
+
     }
 
     override fun setTitle() {
@@ -59,10 +76,32 @@ class MotoclubesFragment : BaseFragment<MotoclubesFragmentPresenter>(), Motoclub
             startActivity(intent)
         }
 
+        if (UserRepository.loggedUser!!.motoclubeId == null) {
+            adapter.onSwipeListener = {
+                presenter.solicitarEntrada(it.id!!)
+            }
+        }
+
         val recyclerView = view?.findViewById<RecyclerView>(R.id.recycler_list)
         recyclerView?.adapter = adapter
         recyclerView?.layoutManager = LinearLayoutManager(view?.context)
 
         refresh_layout.isRefreshing = false
+    }
+
+    override fun showError(msg: String?) {
+        Toast.makeText(context, msg ?: "Houve um erro na requisição", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onSolicitarEntrada() {
+
+        view?.apply {
+            Snackbar.make(this, "Solicitação enviada com sucesso", Snackbar.LENGTH_LONG).show()
+        }
+
+        fragmentManager?.beginTransaction()
+            ?.detach(this)
+            ?.attach(this)
+            ?.commit()
     }
 }
