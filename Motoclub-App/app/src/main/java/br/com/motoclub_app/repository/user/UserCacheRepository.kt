@@ -1,12 +1,12 @@
-package br.com.motoclub_app.repository
+package br.com.motoclub_app.repository.user
 
-import br.com.motoclub_app.core.repository.AbstractRepository
+import br.com.motoclub_app.core.repository.BaseCacheRepository
 import br.com.motoclub_app.model.User
 import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
 import javax.inject.Inject
 
-class UserRepository @Inject constructor() : AbstractRepository<User>() {
+class UserCacheRepository @Inject constructor() : BaseCacheRepository<User>() {
 
     fun getUserByEmail(email: String): User? {
 
@@ -37,22 +37,22 @@ class UserRepository @Inject constructor() : AbstractRepository<User>() {
         val editor = sharedPreferences.edit()
 
         user.id?.apply {
-            editor.putLong("loggedUser", this)
+            editor.putString("currentUser", this)
             editor.apply()
         }
 
-        loggedUser = user
+        currentUser = user
     }
 
 
     fun getCache(): User? {
 
-        if (sharedPreferences.contains("loggedUser")) {
-            val userId: Long = sharedPreferences.getLong("loggedUser", 0)
+        if (sharedPreferences.contains("currentUser")) {
+            val userId: String? = sharedPreferences.getString("currentUser", null)
 
-            if (userId != 0L) {
-                loggedUser = findById(userId)
-                return loggedUser
+            userId?.apply {
+                currentUser = findById(userId)
+                return currentUser
             }
         }
 
@@ -60,9 +60,9 @@ class UserRepository @Inject constructor() : AbstractRepository<User>() {
     }
 
     fun removeCache() {
-        if (sharedPreferences.contains("loggedUser")) {
-            sharedPreferences.edit().remove("loggedUser").apply()
-            loggedUser = null
+        if (sharedPreferences.contains("currentUser")) {
+            sharedPreferences.edit().remove("currentUser").apply()
+            currentUser = null
         }
     }
 
@@ -71,6 +71,6 @@ class UserRepository @Inject constructor() : AbstractRepository<User>() {
     override fun getTypeToken(): Type = object : TypeToken<List<User>>() {}.type
 
     companion object {
-        var loggedUser: User? = null
+        var currentUser: User? = null
     }
 }

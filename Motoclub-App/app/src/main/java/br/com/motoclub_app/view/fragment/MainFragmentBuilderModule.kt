@@ -11,7 +11,7 @@ import dagger.Module
 import dagger.android.ContributesAndroidInjector
 
 @Module
-abstract class FragmentBuilderModule {
+abstract class MainFragmentBuilderModule {
 
     @PerFragment
     @ContributesAndroidInjector(modules = [IntegranteFragmentModule::class])

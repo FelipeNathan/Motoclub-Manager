@@ -10,7 +10,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import br.com.motoclub_app.R
-import br.com.motoclub_app.repository.UserRepository
+import br.com.motoclub_app.repository.user.UserCacheRepository
 import br.com.motoclub_app.view.activity.motoclube.MotoclubeActivity
 import br.com.motoclub_app.view.fragment.BaseFragment
 import br.com.motoclub_app.view.fragment.Item
@@ -48,7 +48,7 @@ class MotoclubesFragment : BaseFragment<MotoclubesFragmentPresenter>(), Motoclub
 
         presenter.loadMotoclubes()
 
-        if (UserRepository.loggedUser?.motoclubeId == null) {
+        if (UserCacheRepository.currentUser?.motoclubeRef == null) {
 
             if (!list_fab.isVisible)
                 list_fab.show()
@@ -76,9 +76,9 @@ class MotoclubesFragment : BaseFragment<MotoclubesFragmentPresenter>(), Motoclub
             startActivity(intent)
         }
 
-        if (UserRepository.loggedUser!!.motoclubeId == null) {
+        if (UserCacheRepository.currentUser!!.motoclubeRef == null) {
             adapter.onSwipeListener = {
-                presenter.solicitarEntrada(it.id!!)
+                presenter.requestEntrance(it.id!!)
             }
         }
 
@@ -93,7 +93,7 @@ class MotoclubesFragment : BaseFragment<MotoclubesFragmentPresenter>(), Motoclub
         Toast.makeText(context, msg ?: "Houve um erro na requisição", Toast.LENGTH_LONG).show()
     }
 
-    override fun onSolicitarEntrada() {
+    override fun onRequestEntrance() {
 
         view?.apply {
             Snackbar.make(this, "Solicitação enviada com sucesso", Snackbar.LENGTH_LONG).show()
@@ -103,5 +103,10 @@ class MotoclubesFragment : BaseFragment<MotoclubesFragmentPresenter>(), Motoclub
             ?.detach(this)
             ?.attach(this)
             ?.commit()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        presenter.onStop()
     }
 }

@@ -7,5 +7,5 @@ interface MainPresenter : Presenter {
 
     fun logout()
 
-    fun getMotoclube(): Motoclube?
+    fun getMotoclube()
 }

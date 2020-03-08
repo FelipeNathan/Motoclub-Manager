@@ -1,5 +1,6 @@
 package br.com.motoclub_app.app.utils
 
+import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -10,16 +11,12 @@ class DateUtils {
         private val uiFormat = SimpleDateFormat("dd/MM/yyyy")
         private val imgNameFormat = SimpleDateFormat("ddMMyyyy")
 
-        fun calendarToString(calendar: Calendar) = uiFormat.format(calendar.time)
+        fun timestampToString(timestamp: Timestamp): String = uiFormat.format(timestamp.toDate())
 
-        fun stringToCalendar(str: String): Calendar {
+        fun stringToTimestamp(str: String): Timestamp {
 
             val date = uiFormat.parse(str)
-            val calendar = Calendar.getInstance()
-
-            calendar.time = date!!
-
-            return calendar
+            return Timestamp(date!!)
         }
 
         fun calendarToImageName(calendar: Calendar): String = imgNameFormat.format(calendar.time)

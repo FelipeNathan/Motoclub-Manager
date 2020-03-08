@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import br.com.motoclub_app.R
@@ -57,6 +58,10 @@ class IntegrantesFragment : BaseFragment<IntegrantesPresenter>(), IntegrantesVie
         recyclerView?.adapter = adapter
         recyclerView?.layoutManager = LinearLayoutManager(view?.context)
 
-        refresh_layout.isRefreshing = false
+        refresh_layout?.isRefreshing = false
+    }
+
+    override fun showMessage(msg: String?) {
+        Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
     }
 }

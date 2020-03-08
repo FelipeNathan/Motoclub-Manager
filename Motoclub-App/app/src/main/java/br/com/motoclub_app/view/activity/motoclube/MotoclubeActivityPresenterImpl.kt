@@ -1,73 +1,86 @@
 package br.com.motoclub_app.view.activity.motoclube
 
-import br.com.motoclub_app.interactor.MotoclubeInteractor
+import br.com.motoclub_app.core.contract.BasePresenter
+import br.com.motoclub_app.interactor.motoclube.MotoclubeInteractor
+import br.com.motoclub_app.interactor.user.UserInteractor
 import br.com.motoclub_app.model.Motoclube
-import br.com.motoclub_app.repository.MotoclubeRepository
-import br.com.motoclub_app.repository.UserRepository
+import br.com.motoclub_app.repository.user.UserCacheRepository
 import br.com.motoclub_app.view.activity.motoclube.contract.MotoclubeActivityPresenter
 import br.com.motoclub_app.view.activity.motoclube.contract.MotoclubeActivityView
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Inject
 
-class MotoclubeActivityPresenterImpl @Inject constructor(val view: MotoclubeActivityView) : MotoclubeActivityPresenter {
+class MotoclubeActivityPresenterImpl @Inject constructor(val view: MotoclubeActivityView) :
+    BasePresenter(),
+    MotoclubeActivityPresenter {
 
     @Inject
-    lateinit var motoclubeRepository: MotoclubeRepository
+    lateinit var motoclubeInteractor: MotoclubeInteractor
 
     @Inject
-    lateinit var userRepository: UserRepository
+    lateinit var userInteractor: UserInteractor
 
-    @Inject
-    lateinit var interactor: MotoclubeInteractor
+    private val onComplete: () -> Unit = view::onSave
 
-    override fun salvar(motoclube: Motoclube) {
+    private val onSuccess: (mcRef: DocumentReference, mc: Motoclube) -> Unit = { mcRef, mc ->
 
-        try {
+        UserCacheRepository.currentUser?.let {
+            val user = it
+            user.motoclubeRef = mcRef
+            user.motoclubeNome = mc.nome
+            userInteractor.setCache(user)
+            userInteractor.save(user).subscribe()
+        }
 
-            motoclubeRepository.save(motoclube)
+        onComplete()
+    }
 
-            UserRepository.loggedUser!!.motoclubeId = motoclube.id
-            userRepository.save(UserRepository.loggedUser!!)
-            userRepository.setCache(UserRepository.loggedUser!!)
+    private val onError: (error: Throwable) -> Unit = { error -> view.showError(error.toString()) }
 
-            view.onSalvar()
+    override fun save(motoclube: Motoclube) {
 
-        } catch (ex: Exception) {
+        FirebaseFirestore.getInstance().runBatch {
+            val disposable =
+                if (motoclube.id == null) {
+                    motoclubeInteractor.add(motoclube)
+                        .subscribe({ ref -> onSuccess(ref, motoclube) }, onError)
+                } else
+                    motoclubeInteractor.save(motoclube).subscribe(onComplete, onError)
 
-            view.showError(ex.message)
+            compositeDisposable.add(disposable)
         }
     }
 
-    override fun loadById(id: Long): Motoclube {
+    override fun loadById(id: String) {
 
-        val motoclube = motoclubeRepository.findById(id)
+        val disposable =
+            motoclubeInteractor.loadById(id).subscribe(view::onLoadMotoclube, onError)
 
-        motoclube?.let { return@loadById it }
-
-        throw Exception("Motoclube não encontrado pelo id $id")
+        compositeDisposable.add(disposable)
     }
 
-    override fun sair() {
+    override fun quit() {
 
-        try {
+        val disposable = motoclubeInteractor.quit().subscribe({
+            userInteractor.setCache(UserCacheRepository.currentUser!!)
+            view.onSave()
+        }, onError)
 
-            UserRepository.loggedUser!!.motoclubeId = null
-            userRepository.save(UserRepository.loggedUser!!)
-            userRepository.setCache(UserRepository.loggedUser!!)
-
-            view.onSalvar()
-
-        } catch (ex: Exception) {
-            view.showError(ex.message)
-        }
+        compositeDisposable.add(disposable)
     }
 
-    override fun solicitarEntrada(mcId: Long) {
+    override fun requestEntrance(mcId: String) {
 
-        try {
-            interactor.requestEntrance(mcId)
-            view.onSalvar()
-        } catch (ex: Exception) {
-            view.showError(ex.message)
-        }
+        val disposable = motoclubeInteractor.requestEntrance(mcId)
+            .subscribe({
+                userInteractor.setCache(UserCacheRepository.currentUser!!)
+                view.onSave()
+            }, onError)
+
+        compositeDisposable.add(disposable)
     }
+
+    override fun getUserReference(userId: String): DocumentReference =
+        userInteractor.getUserReference(userId)
 }

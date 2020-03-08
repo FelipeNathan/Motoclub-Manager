@@ -9,5 +9,5 @@ interface MotoclubesFragmentView : View {
 
     fun showError(msg: String?)
 
-    fun onSolicitarEntrada()
+    fun onRequestEntrance()
 }

@@ -1,12 +1,11 @@
 package br.com.motoclub_app.core.repository
 
 import android.content.SharedPreferences
-import br.com.motoclub_app.core.model.AbstractModel
+import br.com.motoclub_app.core.model.BaseModel
 import com.google.gson.Gson
-import java.util.*
 import javax.inject.Inject
 
-abstract class AbstractRepository<Model : AbstractModel> : Repository<Model> {
+abstract class BaseCacheRepository<Model : BaseModel> : Repository<Model> {
 
     @Inject
     lateinit var sharedPreferences: SharedPreferences
@@ -14,7 +13,7 @@ abstract class AbstractRepository<Model : AbstractModel> : Repository<Model> {
     @Inject
     lateinit var gson: Gson
 
-    override fun findById(id: Long): Model? {
+    override fun findById(id: String): Model? {
         val models = loadAll()
         return models?.first { it.id == id }
 
@@ -33,12 +32,10 @@ abstract class AbstractRepository<Model : AbstractModel> : Repository<Model> {
 
         val modelList: MutableList<Model> = loadAll() ?: mutableListOf()
 
-        model.dataAlteracao = Calendar.getInstance()
-
         if (model.id == null) {
 
             if (modelList.isEmpty()) {
-                model.id = 1L
+                model.id = ""
             } else {
                 model.id = modelList[modelList.size - 1].id!! + 1
             }
@@ -54,7 +51,7 @@ abstract class AbstractRepository<Model : AbstractModel> : Repository<Model> {
         sharedPreferences.edit().putString(getEntity(), gson.toJson(modelList)).apply()
     }
 
-    override fun delete(id: Long) {
+    override fun delete(id: String) {
 
         val models = loadAll()
 
@@ -66,5 +63,7 @@ abstract class AbstractRepository<Model : AbstractModel> : Repository<Model> {
 
         sharedPreferences.edit().putString(getEntity(), gson.toJson(models)).apply()
     }
+
+    abstract fun getEntity(): String
 
 }

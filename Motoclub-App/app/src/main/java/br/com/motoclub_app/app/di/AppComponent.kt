@@ -2,9 +2,8 @@ package br.com.motoclub_app.app.di
 
 import android.app.Application
 import br.com.motoclub_app.MotoclubeApplication
-import br.com.motoclub_app.model.Motoclube
+import br.com.motoclub_app.interactor.di.InteractorModule
 import br.com.motoclub_app.view.activity.ActivityBuilderModule
-import br.com.motoclub_app.view.fragment.FragmentBuilderModule
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjector
@@ -16,18 +15,14 @@ import javax.inject.Singleton
     modules = [
         AndroidSupportInjectionModule::class,
         ActivityBuilderModule::class,
-        FragmentBuilderModule::class,
-        AppModule::class
+        AppModule::class,
+        InteractorModule::class
     ]
 )
 interface AppComponent : AndroidInjector<MotoclubeApplication> {
 
-    @Component.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun application(motoclubeApplication: Application): Builder
-
-        fun build(): AppComponent
+    @Component.Factory
+    interface Factory {
+        fun create(@BindsInstance motoclubeApplication: Application): AppComponent
     }
 }

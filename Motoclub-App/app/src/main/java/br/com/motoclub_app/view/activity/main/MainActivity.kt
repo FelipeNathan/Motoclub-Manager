@@ -3,9 +3,9 @@ package br.com.motoclub_app.view.activity.main
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -15,7 +15,8 @@ import androidx.fragment.app.Fragment
 import br.com.motoclub_app.R
 import br.com.motoclub_app.app.Permissions
 import br.com.motoclub_app.app.utils.ImageUtils
-import br.com.motoclub_app.repository.UserRepository
+import br.com.motoclub_app.model.Motoclube
+import br.com.motoclub_app.repository.user.UserCacheRepository
 import br.com.motoclub_app.type.EventType
 import br.com.motoclub_app.view.activity.BaseActivity
 import br.com.motoclub_app.view.activity.login.LoginActivity
@@ -34,6 +35,8 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView, NavigationView.OnN
     @Inject
     lateinit var permissions: Permissions
 
+    private lateinit var headerView: View
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -45,7 +48,11 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView, NavigationView.OnN
 
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val toggle = ActionBarDrawerToggle(
-            this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+            this,
+            drawerLayout,
+            toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
         )
 
         drawerLayout.addDrawerListener(toggle)
@@ -57,8 +64,10 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView, NavigationView.OnN
         requestPermissions()
 
         val fragment: Fragment =
-            if (UserRepository.loggedUser?.motoclubeId == null) MotoclubesFragment() else IntegrantesFragment()
+            if (UserCacheRepository.currentUser?.motoclubeRef == null) MotoclubesFragment() else IntegrantesFragment()
         setFragment(fragment)
+
+        this.presenter.getMotoclube()
     }
 
     override fun onResume() {
@@ -105,6 +114,10 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView, NavigationView.OnN
         startActivity(intent)
     }
 
+    override fun onGetMotoclube(motoclube: Motoclube) {
+        headerView.findViewById<TextView>(R.id.nav_perfil_motoclube_name).text = motoclube.nome
+    }
+
     private fun requestPermissions() {
         permissions.addCameraPermission()
         permissions.addStoragePermission()
@@ -113,16 +126,12 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView, NavigationView.OnN
 
     private fun configureUserHeader(navView: NavigationView) {
 
-        UserRepository.loggedUser!!.let { user ->
+        UserCacheRepository.currentUser!!.let { user ->
 
-            val headerView = navView.getHeaderView(0)
-            val perfilName =
-                if (user.apelido != null && user.apelido.toString().isNotEmpty()) user.apelido else user.nome
+            headerView = navView.getHeaderView(0)
+
+            val perfilName = if (user.apelido != null && user.apelido.toString().isNotEmpty()) user.apelido else user.nome
             headerView.findViewById<TextView>(R.id.nav_perfil_name).text = perfilName
-
-            presenter.getMotoclube()?.let { mc ->
-                headerView.findViewById<TextView>(R.id.nav_perfil_motoclube_name).text = mc.nome
-            }
 
             user.imageId?.let { image ->
                 ImageUtils.loadImage(this, image, headerView.findViewById(R.id.nav_perfil_image))
@@ -130,7 +139,7 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView, NavigationView.OnN
 
             headerView.findViewById<ConstraintLayout>(R.id.nav_perfil).setOnClickListener {
 
-                UserRepository.loggedUser!!.imageId?.let {
+                UserCacheRepository.currentUser!!.imageId?.let {
                     ImageUtils.openImageViewer(this, it)
                 }
             }
@@ -144,15 +153,20 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView, NavigationView.OnN
     }
 
     private fun configureMenu(navView: NavigationView) {
-        UserRepository.loggedUser!!.let { user ->
-            navView.menu.findItem(R.id.nav_meu_motoclube).isVisible = (user.motoclubeId != null)
+        UserCacheRepository.currentUser!!.let { user ->
+            navView.menu.findItem(R.id.nav_meu_motoclube).isVisible = (user.motoclubeRef != null)
         }
     }
 
     private fun openMyMotoclube() {
         val intent = Intent(this, MotoclubeActivity::class.java)
-        intent.putExtra("id", UserRepository.loggedUser!!.motoclubeId)
+        intent.putExtra("id", UserCacheRepository.currentUser!!.motoclubeRef!!.id)
         intent.putExtra("readOnly", false)
         startActivity(intent)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        presenter.onStop()
     }
 }

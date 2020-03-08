@@ -8,14 +8,12 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.Toast
-import androidx.appcompat.widget.Toolbar
 import androidx.core.view.children
 import br.com.motoclub_app.R
 import br.com.motoclub_app.app.utils.DateUtils
 import br.com.motoclub_app.app.utils.ImageUtils
 import br.com.motoclub_app.model.Motoclube
-import br.com.motoclub_app.repository.UserRepository
+import br.com.motoclub_app.repository.user.UserCacheRepository
 import br.com.motoclub_app.view.activity.BaseActivity
 import br.com.motoclub_app.view.activity.motoclube.contract.MotoclubeActivityView
 import br.com.motoclub_app.view.fragment.BottomNavigationFragment
@@ -27,7 +25,8 @@ import kotlinx.android.synthetic.main.activity_motoclube.*
 class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), MotoclubeActivityView {
 
     private lateinit var myForm: Form
-    lateinit var motoclube: Motoclube
+
+    var motoclube: Motoclube = Motoclube()
 
     private var isEdit = false
     private var isReadOnly = false
@@ -56,7 +55,7 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.motoclube_menu, menu)
 
-        if (UserRepository.loggedUser!!.motoclubeId == null) {
+        if (UserCacheRepository.currentUser!!.motoclubeRef == null) {
             menu?.findItem(R.id.motoclube_menu_sair)?.isVisible = false
         }
 
@@ -67,7 +66,7 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
 
         when (item.itemId) {
             // R.id.motoclube_menu_integrantes ->
-            R.id.motoclube_menu_sair -> presenter.sair()
+            R.id.motoclube_menu_sair -> presenter.quit()
         }
         return super.onOptionsItemSelected(item)
     }
@@ -85,7 +84,7 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
                     it.isEnabled = false
             }
 
-            if (UserRepository.loggedUser!!.motoclubeId == null) {
+            if (UserCacheRepository.currentUser!!.motoclubeRef == null) {
                 activity_motoclube_btn_solicitar_entrada.visibility = View.VISIBLE
             }
         }
@@ -95,7 +94,7 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
             // Novo cadastro não há integrantes, portanto quem cria será o presidente até editar e adicionar mais integrantes
             if (activity_motoclube_presidente.text.toString().isEmpty()) {
                 val nomePresidente =
-                    UserRepository.loggedUser!!.apelido ?: UserRepository.loggedUser!!.nome
+                    UserCacheRepository.currentUser!!.apelido ?: UserCacheRepository.currentUser!!.nome
                 activity_motoclube_presidente.setText(nomePresidente)
             }
             activity_motoclube_presidente.isEnabled = false
@@ -111,35 +110,12 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
                 isEdit = true
 
                 Log.i(TAG, "Have an ID Extra")
-                val mcId = getLong("id")
+                val mcId = getString("id")
 
                 Log.i(TAG, "Loading user from repository")
-                motoclube = presenter.loadById(mcId)
-
-                activity_motoclube_name.setText(motoclube.nome)
-
-                val presidenteName =
-                    motoclube.presidente?.apelido ?: motoclube.presidente?.nome ?: ""
-                activity_motoclube_presidente.setText(presidenteName)
-
-                motoclube.dataFundacao?.let {
-                    activity_motoclube_fundacao.setText(
-                        DateUtils.calendarToString(
-                            it
-                        )
-                    )
-                }
-
-                motoclube.imageId?.let {
-                    updateImage(Uri.parse(it))
-                }
-
-                title = "MC ${motoclube.nome}"
+                presenter.loadById(mcId!!)
             }
         }
-
-        if (!::motoclube.isInitialized)
-            motoclube = Motoclube()
     }
 
     private fun initFormValidation() {
@@ -188,33 +164,34 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
         }
 
         activity_motoclube_btn_solicitar_entrada.setOnClickListener {
-            presenter.solicitarEntrada(motoclube.id!!)
+            presenter.requestEntrance(motoclube.id!!)
         }
 
         MaskedTextChangedListener.installOn(activity_motoclube_fundacao, "[00]/[00]/[0000]")
-        activity_motoclube_btn_salvar.setOnClickListener { salvar() }
+        activity_motoclube_btn_salvar.setOnClickListener { save() }
     }
 
-    private fun salvar() {
+    private fun save() {
         Log.i(TAG, "Validating form")
         val result = myForm.validate()
 
         if (result.success()) {
-            Log.i(TAG, "Saving the motoclubeId")
+            Log.i(TAG, "Saving the motoclubeRef")
             motoclube.apply {
                 nome = activity_motoclube_name.text.toString()
-                presidente = UserRepository.loggedUser!!
+                presidenteRef = presenter.getUserReference(UserCacheRepository.currentUser!!.id!!)
+                presidenteNome = UserCacheRepository.currentUser!!.apelido ?: UserCacheRepository.currentUser!!.nome
 
                 if (activity_motoclube_fundacao.text.toString().isNotBlank()) {
                     dataFundacao =
-                        DateUtils.stringToCalendar(activity_motoclube_fundacao.text.toString())
+                        DateUtils.stringToTimestamp(activity_motoclube_fundacao.text.toString())
                 }
 
                 imagePath?.apply {
                     imageId = this.toString()
                 }
             }
-            presenter.salvar(motoclube)
+            presenter.save(motoclube)
         } else {
 
             Log.i(TAG, result.errors().toString())
@@ -225,12 +202,36 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
         ImageUtils.loadImage(this, uri.toString(), activity_motoclube_img)
     }
 
-    override fun onSalvar() {
+    override fun onSave() {
         finish()
     }
 
-    override fun showError(msg: String?) {
-        Toast.makeText(this, msg ?: "Houve um erro ao salvar", Toast.LENGTH_LONG).show()
+    override fun onLoadMotoclube(mc: Motoclube?) {
+
+        mc?.let {
+            motoclube = it
+        }
+
+        activity_motoclube_name.setText(motoclube.nome)
+
+        val presidenteNome =motoclube.presidenteNome?: ""
+
+        activity_motoclube_presidente.setText(presidenteNome)
+
+        motoclube.dataFundacao?.let {
+            activity_motoclube_fundacao.setText(DateUtils.timestampToString(it))
+        }
+
+        motoclube.imageId?.let {
+            updateImage(Uri.parse(it))
+        }
+
+        title = "MC ${motoclube.nome}"
+    }
+
+    override fun onStop() {
+        super.onStop()
+        presenter.onStop()
     }
 
     companion object {

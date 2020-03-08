@@ -9,7 +9,7 @@ import androidx.core.content.ContextCompat
 import br.com.motoclub_app.type.ActivityRequestCodeType
 import javax.inject.Inject
 
-class Permissions @Inject constructor(val context: Context) {
+class Permissions constructor(val context: Context) {
 
     var permissionsToRequest = mutableListOf<String>()
 

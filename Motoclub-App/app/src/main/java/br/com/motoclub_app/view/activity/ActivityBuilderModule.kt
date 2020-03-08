@@ -9,6 +9,7 @@ import br.com.motoclub_app.view.activity.user.di.UserActivityModule
 import br.com.motoclub_app.app.scope.PerActivity
 import br.com.motoclub_app.view.activity.motoclube.MotoclubeActivity
 import br.com.motoclub_app.view.activity.motoclube.di.MotoclubeActivityModule
+import br.com.motoclub_app.view.fragment.MainFragmentBuilderModule
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 
@@ -20,7 +21,7 @@ abstract class ActivityBuilderModule {
     abstract fun contributeLoginActivity(): LoginActivity
 
     @PerActivity
-    @ContributesAndroidInjector(modules = [MainActivityModule::class])
+    @ContributesAndroidInjector(modules = [MainActivityModule::class, MainFragmentBuilderModule::class])
     abstract fun contributeMainActivity(): MainActivity
 
     @PerActivity

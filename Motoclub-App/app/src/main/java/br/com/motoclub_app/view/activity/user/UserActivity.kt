@@ -14,10 +14,8 @@ import br.com.motoclub_app.R
 import br.com.motoclub_app.app.utils.DateUtils
 import br.com.motoclub_app.app.utils.ImageUtils
 import br.com.motoclub_app.model.User
-import br.com.motoclub_app.repository.UserRepository
 import br.com.motoclub_app.type.CargoType
 import br.com.motoclub_app.view.activity.BaseActivity
-import br.com.motoclub_app.view.activity.login.LoginActivity
 import br.com.motoclub_app.view.activity.main.MainActivity
 import br.com.motoclub_app.view.activity.user.contract.UserPresenter
 import br.com.motoclub_app.view.activity.user.contract.UserView
@@ -32,7 +30,7 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
     private lateinit var myForm: Form
     private lateinit var tipoSanguineoAdapter: ArrayAdapter<String>
 
-    lateinit var user: User
+    var user: User = User()
 
     private var isEdit = false
     private var isReadOnly = false
@@ -100,33 +98,10 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
                 activity_user_email.isEnabled = false
 
                 Log.i(TAG, "Have an ID Extra")
-                val userId = getLong("id")
-
-                user = if (UserRepository.loggedUser!!.id == userId) {
-                    Log.i(TAG, "The ID is of the Logged User")
-                    UserRepository.loggedUser!!
-                } else {
-                    Log.i(TAG, "Loading user from repository")
-                    presenter.loadById(userId)
-                }
-
-                activity_user_name.setText(user.nome)
-                activity_user_apelido.setText(user.apelido)
-
-                activity_user_tipo_sanguineo.setSelection(tipoSanguineoAdapter.getPosition(user.tipoSanguineo))
-                activity_user_cargo.setSelection(CargoType.values().indexOf(user.cargo))
-                activity_user_telefone.setText(user.telefone)
-                activity_user_email.setText(user.email)
-                activity_user_password.setText(user.password)
-
-                user.nascimento?.let { activity_user_data_nascimento.setText(DateUtils.calendarToString(it)) }
-                user.imageId?.let { updateImage(Uri.parse(it)) }
-
+                val userId = getString("id")
+                presenter.loadById(userId!!)
             }
         }
-
-        if (!::user.isInitialized)
-            user = User()
     }
 
     private fun initFormValidation() {
@@ -193,10 +168,10 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
             }
         }
 
-        activity_user_btn_salvar.setOnClickListener { salvar() }
+        activity_user_btn_salvar.setOnClickListener { save() }
     }
 
-    private fun salvar() {
+    private fun save() {
 
         Log.i(TAG, "Validating form")
         val result = myForm.validate()
@@ -209,7 +184,7 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
                 tipoSanguineo = activity_user_tipo_sanguineo.selectedItem.toString()
 
                 if (activity_user_data_nascimento.text.toString().isNotBlank())
-                    nascimento = DateUtils.stringToCalendar(activity_user_data_nascimento.text.toString())
+                    nascimento = DateUtils.stringToTimestamp(activity_user_data_nascimento.text.toString())
 
                 cargo = CargoType.values()[activity_user_cargo.selectedItemPosition]
                 telefone = activity_user_telefone.text.toString()
@@ -220,14 +195,14 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
                     imageId = this.toString()
                 }
             }
-            presenter.salvar(user)
+            presenter.save(user)
         } else {
 
             Log.i(TAG, result.errors().toString())
         }
     }
 
-    override fun onSalvar() {
+    override fun onSave() {
 
 
         if (isEdit) {
@@ -241,12 +216,36 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
         }
     }
 
-    override fun showError(msg: String?) {
-        Toast.makeText(this, msg ?: "Houve um erro ao salvar", Toast.LENGTH_LONG).show()
+    override fun showMessage(msg: String?) {
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+    }
+
+    override fun onLoadUser(u: User?) {
+
+        u?.let {
+            this.user = it
+        }
+
+        activity_user_name.setText(user.nome)
+        activity_user_apelido.setText(user.apelido)
+
+        activity_user_tipo_sanguineo.setSelection(tipoSanguineoAdapter.getPosition(user.tipoSanguineo))
+        activity_user_cargo.setSelection(CargoType.values().indexOf(user.cargo))
+        activity_user_telefone.setText(user.telefone)
+        activity_user_email.setText(user.email)
+        activity_user_password.setText(user.password)
+
+        user.nascimento?.let { activity_user_data_nascimento.setText(DateUtils.timestampToString(it)) }
+        user.imageId?.let { updateImage(Uri.parse(it)) }
     }
 
     private fun updateImage(uri: Uri?) {
         ImageUtils.loadImage(this, uri.toString(), activity_user_img)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        presenter.onStop()
     }
 
     companion object {

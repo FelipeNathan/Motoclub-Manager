@@ -1,12 +1,14 @@
 package br.com.motoclub_app.view.fragment.evento.lista
 
+import br.com.motoclub_app.core.contract.BasePresenter
 import br.com.motoclub_app.type.EventType
 import br.com.motoclub_app.view.fragment.Item
 import br.com.motoclub_app.view.fragment.evento.lista.contract.EventosPresenter
 import br.com.motoclub_app.view.fragment.evento.lista.contract.EventosView
 import javax.inject.Inject
 
-class EventosPresenterImpl @Inject constructor(val view: EventosView) : EventosPresenter {
+class EventosPresenterImpl @Inject constructor(val view: EventosView) : BasePresenter(),
+    EventosPresenter {
 
     override fun loadEvents(eventType: EventType) {
 

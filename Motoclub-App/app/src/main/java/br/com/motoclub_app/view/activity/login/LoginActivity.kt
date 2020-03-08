@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import br.com.motoclub_app.R
-import br.com.motoclub_app.repository.UserRepository
 import br.com.motoclub_app.view.activity.BaseActivity
 import br.com.motoclub_app.view.activity.login.contract.LoginPresenter
 import br.com.motoclub_app.view.activity.login.contract.LoginView
@@ -58,7 +57,11 @@ class LoginActivity : BaseActivity<LoginPresenter>(), LoginView, View.OnClickLis
             return
         }
 
-        presenter.onLogin(email, pass)
+        presenter.login(email, pass)
     }
 
+    override fun onStop() {
+        super.onStop()
+        presenter.onStop()
+    }
 }

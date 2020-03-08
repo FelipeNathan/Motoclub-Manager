@@ -5,7 +5,7 @@ import br.com.motoclub_app.model.User
 
 interface UserPresenter : Presenter {
 
-    fun salvar(user: User)
+    fun save(user: User)
 
-    fun loadById(id: Long): User
+    fun loadById(id: String)
 }

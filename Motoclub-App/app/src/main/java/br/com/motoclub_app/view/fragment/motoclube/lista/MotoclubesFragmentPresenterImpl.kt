@@ -1,53 +1,59 @@
 package br.com.motoclub_app.view.fragment.motoclube.lista
 
-import android.os.Handler
-import br.com.motoclub_app.interactor.MotoclubeInteractor
-import br.com.motoclub_app.repository.MotoclubeRepository
+import android.util.Log
+import br.com.motoclub_app.core.contract.BasePresenter
+import br.com.motoclub_app.interactor.motoclube.MotoclubeInteractor
 import br.com.motoclub_app.view.fragment.Item
 import br.com.motoclub_app.view.fragment.motoclube.lista.contract.MotoclubesFragmentPresenter
 import br.com.motoclub_app.view.fragment.motoclube.lista.contract.MotoclubesFragmentView
 import javax.inject.Inject
 
 class MotoclubesFragmentPresenterImpl @Inject constructor(val view: MotoclubesFragmentView) :
+    BasePresenter(),
     MotoclubesFragmentPresenter {
 
     @Inject
-    lateinit var motoclubeRepository: MotoclubeRepository
-
-    @Inject
-    lateinit var interactor: MotoclubeInteractor
+    lateinit var motoclubeInteractor: MotoclubeInteractor
 
     override fun loadMotoclubes() {
 
-        val items = mutableListOf<Item>()
+        Log.i("Instance", motoclubeInteractor.toString())
 
-        motoclubeRepository.loadAll()?.forEach {
+        val disposable = motoclubeInteractor.loadMotoclubes().subscribe({ motoclubes ->
 
-            items.add(
-                Item(
-                    id = it.id,
-                    mainInfo = it.nome,
-                    subInfo = "Presidente: ${it.presidente?.nome}",
-                    image = it.imageId
-                )
-            )
+            val items = mutableListOf<Item>()
 
+            motoclubes.forEach { mc ->
+                run {
+                    items.add(
+                        Item(
+                            id = mc.id,
+                            mainInfo = mc.nome,
+                            subInfo = "Presidente: ${mc.presidenteNome}",
+                            image = mc.imageId
+                        )
+                    )
+                }
+            }
+
+            view.onLoadMotoclubes(items)
+
+        }) {
+            view.showError(it?.toString())
         }
 
-        view.onLoadMotoclubes(items)
+        compositeDisposable.add(disposable)
     }
 
-    override fun solicitarEntrada(mcId: Long) {
+    override fun requestEntrance(mcId: String) {
 
-        try {
-            interactor.requestEntrance(mcId)
+        val disposable = motoclubeInteractor.requestEntrance(mcId)
+            .subscribe({
+                view.onRequestEntrance()
+            }) {
+                view.showError(it?.toString())
+            }
 
-            Handler().postDelayed({
-                view.onSolicitarEntrada()
-            }, 500)
-
-        } catch (ex: Exception) {
-            view.showError(ex.message)
-        }
+        compositeDisposable.add(disposable)
     }
 }

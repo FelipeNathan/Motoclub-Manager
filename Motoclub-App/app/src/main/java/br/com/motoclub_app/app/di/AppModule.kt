@@ -35,5 +35,6 @@ abstract class AppModule {
         @Provides
         @Singleton
         fun provideGson() = Gson()
+
     }
 }

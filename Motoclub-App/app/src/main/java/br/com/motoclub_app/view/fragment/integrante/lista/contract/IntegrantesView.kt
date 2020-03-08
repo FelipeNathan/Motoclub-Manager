@@ -6,4 +6,6 @@ import br.com.motoclub_app.view.fragment.Item
 interface IntegrantesView : View {
 
     fun onLoadIntegrantes(integrantes: MutableList<Item>)
+
+    fun showMessage(msg: String?)
 }

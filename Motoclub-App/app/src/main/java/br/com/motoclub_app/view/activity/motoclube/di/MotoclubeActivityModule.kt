@@ -18,5 +18,4 @@ abstract class MotoclubeActivityModule {
     @Binds
     @PerActivity
     abstract fun provideView(view: MotoclubeActivity): MotoclubeActivityView
-
 }
