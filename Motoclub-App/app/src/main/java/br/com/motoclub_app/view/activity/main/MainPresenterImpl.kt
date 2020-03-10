@@ -10,16 +10,12 @@ import br.com.motoclub_app.view.activity.main.contract.MainPresenter
 import br.com.motoclub_app.view.activity.main.contract.MainView
 import javax.inject.Inject
 
-class MainPresenterImpl @Inject constructor(val view: MainView) : BasePresenter(), MainPresenter {
-
-    @Inject
-    lateinit var userRepository: UserCacheRepository
-
-    @Inject
-    lateinit var motoclubeInteractor: MotoclubeInteractor
-
-    @Inject
-    lateinit var firebaseInteractor: FirebaseInteractor
+class MainPresenterImpl @Inject constructor(
+    private val view: MainView,
+    private val userRepository: UserCacheRepository,
+    private val motoclubeInteractor: MotoclubeInteractor,
+    private val firebaseInteractor: FirebaseInteractor
+) : BasePresenter(), MainPresenter {
 
     override fun logout() {
         userRepository.removeCache()

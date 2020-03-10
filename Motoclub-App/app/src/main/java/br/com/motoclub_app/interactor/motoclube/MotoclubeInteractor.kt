@@ -2,7 +2,9 @@ package br.com.motoclub_app.interactor.motoclube
 
 import br.com.motoclub_app.model.Motoclube
 import com.google.firebase.firestore.DocumentReference
-import io.reactivex.*
+import io.reactivex.Completable
+import io.reactivex.Flowable
+import io.reactivex.Single
 
 interface MotoclubeInteractor {
 

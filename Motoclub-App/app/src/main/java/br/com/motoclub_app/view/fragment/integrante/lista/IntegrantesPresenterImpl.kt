@@ -7,11 +7,11 @@ import br.com.motoclub_app.view.fragment.integrante.lista.contract.IntegrantesPr
 import br.com.motoclub_app.view.fragment.integrante.lista.contract.IntegrantesView
 import javax.inject.Inject
 
-class IntegrantesPresenterImpl @Inject constructor(val view: IntegrantesView) : BasePresenter(),
+class IntegrantesPresenterImpl @Inject constructor(
+    private val view: IntegrantesView,
+    private val userInteractor: UserInteractor
+) : BasePresenter(),
     IntegrantesPresenter {
-
-    @Inject
-    lateinit var userInteractor: UserInteractor
 
     override fun loadIntegrantes() {
 

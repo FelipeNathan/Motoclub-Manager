@@ -10,14 +10,12 @@ import br.com.motoclub_app.view.activity.user.contract.UserPresenter
 import br.com.motoclub_app.view.activity.user.contract.UserView
 import javax.inject.Inject
 
-class UserPresenterImpl @Inject constructor(val view: UserView) : BasePresenter(),
+class UserPresenterImpl @Inject constructor(
+    private val view: UserView,
+    private val userInteractor: UserInteractor,
+    private val firebaseInteractor: FirebaseInteractor
+) : BasePresenter(),
     UserPresenter {
-
-    @Inject
-    lateinit var userInteractor: UserInteractor
-
-    @Inject
-    lateinit var firebaseInteractor: FirebaseInteractor
 
     override fun save(user: User) {
 

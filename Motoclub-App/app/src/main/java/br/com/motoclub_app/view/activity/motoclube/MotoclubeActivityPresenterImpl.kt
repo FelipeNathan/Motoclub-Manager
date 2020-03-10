@@ -11,15 +11,13 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Inject
 
-class MotoclubeActivityPresenterImpl @Inject constructor(val view: MotoclubeActivityView) :
+class MotoclubeActivityPresenterImpl @Inject constructor(
+    private val view: MotoclubeActivityView,
+    private val motoclubeInteractor: MotoclubeInteractor,
+    private val userInteractor: UserInteractor
+) :
     BasePresenter(),
     MotoclubeActivityPresenter {
-
-    @Inject
-    lateinit var motoclubeInteractor: MotoclubeInteractor
-
-    @Inject
-    lateinit var userInteractor: UserInteractor
 
     private val onComplete: () -> Unit = view::onSave
 

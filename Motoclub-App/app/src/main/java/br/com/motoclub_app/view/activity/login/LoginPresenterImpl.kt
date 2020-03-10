@@ -8,14 +8,12 @@ import br.com.motoclub_app.view.activity.login.contract.LoginPresenter
 import br.com.motoclub_app.view.activity.login.contract.LoginView
 import javax.inject.Inject
 
-class LoginPresenterImpl @Inject constructor(private val view: LoginView) : BasePresenter(),
+class LoginPresenterImpl @Inject constructor(
+    private val view: LoginView,
+    private val userInteractor: UserInteractor,
+    private val firebaseInteractor: FirebaseInteractor
+) : BasePresenter(),
     LoginPresenter {
-
-    @Inject
-    lateinit var userInteractor: UserInteractor
-
-    @Inject
-    lateinit var firebaseInteractor: FirebaseInteractor
 
     override fun login(email: String, password: String) {
 

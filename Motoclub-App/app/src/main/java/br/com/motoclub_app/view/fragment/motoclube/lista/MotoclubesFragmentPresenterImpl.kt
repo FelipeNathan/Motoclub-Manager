@@ -8,12 +8,12 @@ import br.com.motoclub_app.view.fragment.motoclube.lista.contract.MotoclubesFrag
 import br.com.motoclub_app.view.fragment.motoclube.lista.contract.MotoclubesFragmentView
 import javax.inject.Inject
 
-class MotoclubesFragmentPresenterImpl @Inject constructor(val view: MotoclubesFragmentView) :
+class MotoclubesFragmentPresenterImpl @Inject constructor(
+    private val view: MotoclubesFragmentView,
+    private val motoclubeInteractor: MotoclubeInteractor
+) :
     BasePresenter(),
     MotoclubesFragmentPresenter {
-
-    @Inject
-    lateinit var motoclubeInteractor: MotoclubeInteractor
 
     override fun loadMotoclubes() {
 
