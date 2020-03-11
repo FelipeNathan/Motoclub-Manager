@@ -106,7 +106,7 @@ class MotoclubesFragment : BaseFragment<MotoclubesFragmentPresenter>(), Motoclub
     }
 
     override fun onStop() {
-        super.onStop()
         presenter.onStop()
+        super.onStop()
     }
 }

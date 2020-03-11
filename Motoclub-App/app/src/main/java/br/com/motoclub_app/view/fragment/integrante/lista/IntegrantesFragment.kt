@@ -64,4 +64,9 @@ class IntegrantesFragment : BaseFragment<IntegrantesPresenter>(), IntegrantesVie
     override fun showMessage(msg: String?) {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
     }
+
+    override fun onStop() {
+        presenter.onStop()
+        super.onStop()
+    }
 }

@@ -230,8 +230,8 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
     }
 
     override fun onStop() {
-        super.onStop()
         presenter.onStop()
+        super.onStop()
     }
 
     companion object {

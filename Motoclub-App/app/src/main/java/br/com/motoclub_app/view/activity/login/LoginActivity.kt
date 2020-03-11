@@ -61,7 +61,7 @@ class LoginActivity : BaseActivity<LoginPresenter>(), LoginView, View.OnClickLis
     }
 
     override fun onStop() {
-        super.onStop()
         presenter.onStop()
+        super.onStop()
     }
 }

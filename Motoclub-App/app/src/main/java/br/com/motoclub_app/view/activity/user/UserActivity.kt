@@ -244,8 +244,8 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
     }
 
     override fun onStop() {
-        super.onStop()
         presenter.onStop()
+        super.onStop()
     }
 
     companion object {

@@ -166,7 +166,7 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView, NavigationView.OnN
     }
 
     override fun onStop() {
-        super.onStop()
         presenter.onStop()
+        super.onStop()
     }
 }
