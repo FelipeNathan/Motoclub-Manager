@@ -21,4 +21,6 @@ interface UserInteractor {
     fun loadAll(): Flowable<List<User>>
 
     fun getUserReference(userId: String): DocumentReference
+
+    fun loadPaginated(orderBy: String, last: String?, limit: Long): Flowable<List<User>>
 }

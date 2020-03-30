@@ -5,7 +5,6 @@ import br.com.motoclub_app.type.CargoType
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.Exclude
-import java.util.*
 
 data class User(
     var nome: String? = null,

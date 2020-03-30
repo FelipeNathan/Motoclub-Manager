@@ -22,6 +22,4 @@ class UserRepository @Inject constructor() : BaseFirebaseRepository<User>() {
                 .whereEqualTo("password", password)
         ).subscribeOn(Schedulers.io())
     }
-
-    fun getUserReference(userId: String): DocumentReference = collection().document(userId)
 }

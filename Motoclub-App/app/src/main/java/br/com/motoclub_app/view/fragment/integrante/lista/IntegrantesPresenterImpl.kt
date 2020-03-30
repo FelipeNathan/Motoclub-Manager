@@ -13,11 +13,11 @@ class IntegrantesPresenterImpl @Inject constructor(
 ) : BasePresenter(),
     IntegrantesPresenter {
 
-    override fun loadIntegrantes() {
+    override fun loadIntegrantes(lastItem: Item?) {
 
         val items = mutableListOf<Item>()
 
-        val disposable = userInteractor.loadAll()
+        val disposable = userInteractor.loadPaginated("nome", lastItem?.subInfo, 20)
             .subscribe({ users ->
 
                 users.forEach {

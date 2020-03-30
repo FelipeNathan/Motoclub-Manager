@@ -14,5 +14,5 @@ interface MotoclubeActivityPresenter : Presenter {
 
     fun requestEntrance(mcId: String)
 
-    fun getUserReference(userId: String): DocumentReference
+    fun getUserReference(userId: String): DocumentReference?
 }

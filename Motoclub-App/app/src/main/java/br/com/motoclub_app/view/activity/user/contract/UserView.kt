@@ -7,7 +7,9 @@ interface UserView : View {
 
     fun onSave()
 
-    fun showMessage(msg: String?)
+    fun showMessage(msg: String)
+
+    fun showError(msg: String?)
 
     fun onLoadUser(u: User?)
 }

@@ -19,6 +19,7 @@ import br.com.motoclub_app.view.activity.motoclube.contract.MotoclubeActivityVie
 import br.com.motoclub_app.view.fragment.BottomNavigationFragment
 import com.afollestad.vvalidator.form
 import com.afollestad.vvalidator.form.Form
+import com.google.android.material.snackbar.Snackbar
 import com.redmadrobot.inputmask.MaskedTextChangedListener
 import kotlinx.android.synthetic.main.activity_motoclube.*
 
@@ -94,7 +95,8 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
             // Novo cadastro não há integrantes, portanto quem cria será o presidente até editar e adicionar mais integrantes
             if (activity_motoclube_presidente.text.toString().isEmpty()) {
                 val nomePresidente =
-                    UserCacheRepository.currentUser!!.apelido ?: UserCacheRepository.currentUser!!.nome
+                    UserCacheRepository.currentUser!!.apelido
+                        ?: UserCacheRepository.currentUser!!.nome
                 activity_motoclube_presidente.setText(nomePresidente)
             }
             activity_motoclube_presidente.isEnabled = false
@@ -176,11 +178,12 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
         val result = myForm.validate()
 
         if (result.success()) {
-            Log.i(TAG, "Saving the motoclubeRef")
+            Log.i(TAG, "Saving the motoclube")
             motoclube.apply {
                 nome = activity_motoclube_name.text.toString()
                 presidenteRef = presenter.getUserReference(UserCacheRepository.currentUser!!.id!!)
-                presidenteNome = UserCacheRepository.currentUser!!.apelido ?: UserCacheRepository.currentUser!!.nome
+                presidenteNome = UserCacheRepository.currentUser!!.apelido
+                    ?: UserCacheRepository.currentUser!!.nome
 
                 if (activity_motoclube_fundacao.text.toString().isNotBlank()) {
                     dataFundacao =
@@ -214,7 +217,7 @@ class MotoclubeActivity : BaseActivity<MotoclubeActivityPresenterImpl>(), Motocl
 
         activity_motoclube_name.setText(motoclube.nome)
 
-        val presidenteNome =motoclube.presidenteNome?: ""
+        val presidenteNome = motoclube.presidenteNome ?: ""
 
         activity_motoclube_presidente.setText(presidenteNome)
 

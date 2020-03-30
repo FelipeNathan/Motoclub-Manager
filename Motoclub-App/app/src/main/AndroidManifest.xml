@@ -3,15 +3,15 @@
         xmlns:tools="http://schemas.android.com/tools"
         package="br.com.motoclub_app">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <uses-feature
             android:name="android.hardware.camera"
-            android:required="false"/>
+            android:required="false" />
 
     <application
             android:name=".MotoclubeApplication"
@@ -22,20 +22,25 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity
+                android:name=".view.activity.startup.StartupActivity"
+                android:configChanges="orientation|keyboardHidden|screenSize"
+                android:label="@string/title_activity_startup"
+                android:theme="@style/FullscreenTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
                 android:name=".view.activity.login.LoginActivity"
                 android:screenOrientation="portrait"
                 android:theme="@style/LoginTheme"
-                tools:ignore="LockedOrientationActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <action android:name="android.intent.action.VIEW"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-        <activity android:name=".view.activity.main.MainActivity"/>
-        <activity android:name=".view.activity.user.UserActivity"/>
-        <activity android:name=".view.activity.motoclube.MotoclubeActivity"/>
+                tools:ignore="LockedOrientationActivity"/>
+        <activity android:name=".view.activity.main.MainActivity" />
+        <activity android:name=".view.activity.user.UserActivity" />
+        <activity android:name=".view.activity.motoclube.MotoclubeActivity" />
 
         <provider
                 android:name="androidx.core.content.FileProvider"
@@ -44,7 +49,7 @@
                 android:grantUriPermissions="true">
             <meta-data
                     android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/file_paths"/>
+                    android:resource="@xml/file_paths" />
         </provider>
     </application>
 

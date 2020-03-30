@@ -8,7 +8,6 @@ import android.util.Patterns
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.core.view.children
 import br.com.motoclub_app.R
 import br.com.motoclub_app.app.utils.DateUtils
@@ -184,7 +183,8 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
                 tipoSanguineo = activity_user_tipo_sanguineo.selectedItem.toString()
 
                 if (activity_user_data_nascimento.text.toString().isNotBlank())
-                    nascimento = DateUtils.stringToTimestamp(activity_user_data_nascimento.text.toString())
+                    nascimento =
+                        DateUtils.stringToTimestamp(activity_user_data_nascimento.text.toString())
 
                 cargo = CargoType.values()[activity_user_cargo.selectedItemPosition]
                 telefone = activity_user_telefone.text.toString()
@@ -214,10 +214,6 @@ class UserActivity : BaseActivity<UserPresenter>(), UserView {
             intent.flags = (Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             startActivity(intent)
         }
-    }
-
-    override fun showMessage(msg: String?) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
     }
 
     override fun onLoadUser(u: User?) {

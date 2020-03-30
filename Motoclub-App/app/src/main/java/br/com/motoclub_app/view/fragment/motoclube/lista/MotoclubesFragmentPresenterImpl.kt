@@ -1,6 +1,5 @@
 package br.com.motoclub_app.view.fragment.motoclube.lista
 
-import android.util.Log
 import br.com.motoclub_app.core.contract.BasePresenter
 import br.com.motoclub_app.interactor.motoclube.MotoclubeInteractor
 import br.com.motoclub_app.view.fragment.Item
@@ -11,20 +10,17 @@ import javax.inject.Inject
 class MotoclubesFragmentPresenterImpl @Inject constructor(
     private val view: MotoclubesFragmentView,
     private val motoclubeInteractor: MotoclubeInteractor
-) :
-    BasePresenter(),
+) : BasePresenter(),
     MotoclubesFragmentPresenter {
 
-    override fun loadMotoclubes() {
+    override fun loadMotoclubes(lastItem: Item?) {
 
-        Log.i("Instance", motoclubeInteractor.toString())
+        val items = mutableListOf<Item>()
 
-        val disposable = motoclubeInteractor.loadMotoclubes().subscribe({ motoclubes ->
+        val disposable = motoclubeInteractor.loadPaginated("nome", lastItem?.mainInfo, 10)
+            .subscribe({ motoclubes ->
 
-            val items = mutableListOf<Item>()
-
-            motoclubes.forEach { mc ->
-                run {
+                motoclubes.forEach { mc ->
                     items.add(
                         Item(
                             id = mc.id,
@@ -34,13 +30,12 @@ class MotoclubesFragmentPresenterImpl @Inject constructor(
                         )
                     )
                 }
+
+                view.onLoadMotoclubes(items)
+
+            }) {
+                view.showError(it?.toString())
             }
-
-            view.onLoadMotoclubes(items)
-
-        }) {
-            view.showError(it?.toString())
-        }
 
         compositeDisposable.add(disposable)
     }
@@ -48,12 +43,8 @@ class MotoclubesFragmentPresenterImpl @Inject constructor(
     override fun requestEntrance(mcId: String) {
 
         val disposable = motoclubeInteractor.requestEntrance(mcId)
-            .subscribe({
-                view.onRequestEntrance()
-            }) {
-                view.showError(it?.toString())
-            }
-
         compositeDisposable.add(disposable)
+
+        view.onRequestEntrance()
     }
 }

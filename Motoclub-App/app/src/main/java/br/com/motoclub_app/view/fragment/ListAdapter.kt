@@ -9,11 +9,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import br.com.motoclub_app.R
 import br.com.motoclub_app.app.utils.ImageUtils
+import br.com.motoclub_app.model.Motoclube
 import com.daimajia.swipe.SwipeLayout
 import com.daimajia.swipe.SwipeLayout.SwipeListener
 
 
-class ListAdapter(private val items: MutableList<Item>) : RecyclerView.Adapter<ListAdapter.ViewHolder>() {
+class ListAdapter(private val items: MutableList<Item>) :
+    RecyclerView.Adapter<ListAdapter.ViewHolder>() {
 
     var onItemClickListener: (item: Item) -> Unit = { }
     var onSwipeListener: ((Item) -> Unit)? = null
@@ -32,6 +34,18 @@ class ListAdapter(private val items: MutableList<Item>) : RecyclerView.Adapter<L
         return items.size
     }
 
+    fun last(): Item? {
+        return if (items.isNotEmpty())
+            items.last()
+        else
+            null
+    }
+
+    fun add(items: Collection<Item>) {
+        this.items.addAll(items)
+        notifyDataSetChanged()
+    }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         val item = items[position]
@@ -45,7 +59,7 @@ class ListAdapter(private val items: MutableList<Item>) : RecyclerView.Adapter<L
             onItemClickListener(item)
         }
 
-         holder.swipeLayout.isSwipeEnabled = onSwipeListener != null
+        holder.swipeLayout.isSwipeEnabled = onSwipeListener != null
 
         holder.swipeLayout.addSwipeListener(object : SwipeListener {
             override fun onOpen(layout: SwipeLayout?) {
@@ -55,15 +69,15 @@ class ListAdapter(private val items: MutableList<Item>) : RecyclerView.Adapter<L
                 }
             }
 
-            override fun onUpdate(layout: SwipeLayout?, leftOffset: Int, topOffset: Int) { }
+            override fun onUpdate(layout: SwipeLayout?, leftOffset: Int, topOffset: Int) {}
 
-            override fun onStartOpen(layout: SwipeLayout?) { }
+            override fun onStartOpen(layout: SwipeLayout?) {}
 
-            override fun onStartClose(layout: SwipeLayout?) { }
+            override fun onStartClose(layout: SwipeLayout?) {}
 
-            override fun onHandRelease(layout: SwipeLayout?, xvel: Float, yvel: Float) { }
+            override fun onHandRelease(layout: SwipeLayout?, xvel: Float, yvel: Float) {}
 
-            override fun onClose(layout: SwipeLayout?) { }
+            override fun onClose(layout: SwipeLayout?) {}
 
         })
 

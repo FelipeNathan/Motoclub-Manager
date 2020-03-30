@@ -1,5 +1,6 @@
 package br.com.motoclub_app.interactor.motoclube
 
+import br.com.motoclub_app.interactor.request.RequestInteractor
 import br.com.motoclub_app.model.Motoclube
 import br.com.motoclub_app.repository.motoclube.MotoclubeCacheRepository
 import br.com.motoclub_app.repository.motoclube.MotoclubeRepository
@@ -9,23 +10,18 @@ import com.google.firebase.firestore.DocumentReference
 import durdinapps.rxfirebase2.RxFirestore
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.disposables.Disposable
 import javax.inject.Inject
 
-class MotoclubeInteractorImpl @Inject constructor() :
+class MotoclubeInteractorImpl @Inject constructor(
+    private val repository: MotoclubeRepository,
+    private val motoclubeCacheRepository: MotoclubeCacheRepository,
+    private val userRepository: UserRepository,
+    private val requestInteractor: RequestInteractor
+) :
     MotoclubeInteractor {
-
-    @Inject
-    lateinit var repository: MotoclubeRepository
-
-    @Inject
-    lateinit var motoclubeCacheRepository: MotoclubeCacheRepository
-
-    @Inject
-    lateinit var userCacheRepository: UserCacheRepository
-
-    @Inject
-    lateinit var userRepository: UserRepository
 
     override fun save(motoclube: Motoclube): Completable = repository.save(motoclube)
 
@@ -43,19 +39,30 @@ class MotoclubeInteractorImpl @Inject constructor() :
         return repository.findById(id).map { it.toObject(Motoclube::class.java) }
     }
 
-    override fun quit(): Completable {
+    override fun quit(): Observable<Disposable> {
 
-        UserCacheRepository.currentUser!!.motoclubeRef = null
-        return userRepository.save(UserCacheRepository.currentUser!!)
+        val user = UserCacheRepository.currentUser!!
+        val userRef = userRepository.getRefereceById(user.id!!)
+        val motoclubeRef = user.motoclubeRef
+
+        user.motoclubeRef = null
+        val disposableUser = userRepository.save(user).subscribe()
+
+        val disposableMotoclube = RxFirestore.observeDocumentRef(motoclubeRef!!)
+            .map { it.toObject(Motoclube::class.java) }
+            .subscribe {
+                it?.integrantesRef?.remove(userRef)
+                repository.save(it!!).subscribe()
+            }
+
+        return Observable.just(disposableUser, disposableMotoclube)
     }
 
-    override fun requestEntrance(mcId: String): Completable {
-
-//        UserCacheRepository.currentUser!!.motoclubeRef = mcId
-        return userRepository.save(UserCacheRepository.currentUser!!)
+    override fun requestEntrance(mcId: String): Disposable {
+        return requestInteractor.requestAcceptance(mcId, UserCacheRepository.currentUser!!)
     }
 
-    override fun loadMotoclubes(): Flowable<List<Motoclube>> =
-        repository.loadAll().map { it -> it.toObjects(Motoclube::class.java) }
+    override fun loadPaginated(orderBy: String, last: String?, limit: Long) : Flowable<List<Motoclube>> =
+        repository.paginate("nome", last, limit).map { it.toObjects(Motoclube::class.java) }
 
 }

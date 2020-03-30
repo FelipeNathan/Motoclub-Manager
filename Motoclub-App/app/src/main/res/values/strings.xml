@@ -49,4 +49,8 @@
     <string name="data_de_fundacao">Data de fundação</string>
     <string name="presidente">Presidente</string>
     <string name="solicitar_entrada">Solicitar entrada</string>
+
+    <string name="title_activity_startup">StartupActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

@@ -28,7 +28,7 @@ class UserPresenterImpl @Inject constructor(
             }
 
         } catch (e: Exception) {
-            view.showMessage(e.message)
+            view.showError(e.message)
         }
     }
 
@@ -44,7 +44,7 @@ class UserPresenterImpl @Inject constructor(
                 }) {
 
                     Log.e(TAG, it.toString(), it)
-                    view.showMessage(it.message)
+                    view.showError(it.message)
                 }
 
         compositeDisposable.add(disposable)

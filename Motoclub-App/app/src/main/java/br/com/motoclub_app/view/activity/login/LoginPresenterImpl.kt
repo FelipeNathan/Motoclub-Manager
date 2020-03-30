@@ -31,15 +31,6 @@ class LoginPresenterImpl @Inject constructor(
         compositeDisposable.add(disposable)
     }
 
-
-    override fun onCreate() {
-
-        Log.i(TAG, "Validando se existe usuário logado")
-        firebaseInteractor.getCurrentUser()?.apply {
-            updateCacheAndLogin(this.uid)
-        }
-    }
-
     private fun updateCacheAndLogin(uuid: String) {
 
         val disposable = userInteractor.findById(uuid)

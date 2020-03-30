@@ -7,6 +7,8 @@ interface MotoclubeActivityView : View {
 
     fun onSave()
 
+    fun showMessage(msg: String)
+
     fun showError(msg: String?)
 
     fun onLoadMotoclube(mc: Motoclube?)

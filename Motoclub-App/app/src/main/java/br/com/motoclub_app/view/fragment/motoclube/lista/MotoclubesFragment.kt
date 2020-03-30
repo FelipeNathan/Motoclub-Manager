@@ -22,6 +22,8 @@ import kotlinx.android.synthetic.main.fragment_list.*
 
 class MotoclubesFragment : BaseFragment<MotoclubesFragmentPresenter>(), MotoclubesFragmentView {
 
+    private var adapter: ListAdapter? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -32,7 +34,7 @@ class MotoclubesFragment : BaseFragment<MotoclubesFragmentPresenter>(), Motoclub
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        refresh_layout.setOnRefreshListener { presenter.loadMotoclubes() }
+        refresh_layout.setOnRefreshListener { presenter.loadMotoclubes(this.adapter?.last()) }
         list_fab.setOnClickListener {
             startActivity(
                 Intent(
@@ -45,8 +47,7 @@ class MotoclubesFragment : BaseFragment<MotoclubesFragmentPresenter>(), Motoclub
 
     override fun onResume() {
         super.onResume()
-
-        presenter.loadMotoclubes()
+        presenter.loadMotoclubes(this.adapter?.last())
 
         if (UserCacheRepository.currentUser?.motoclubeRef == null) {
 
@@ -56,8 +57,6 @@ class MotoclubesFragment : BaseFragment<MotoclubesFragmentPresenter>(), Motoclub
 
             list_fab.hide()
         }
-
-
     }
 
     override fun setTitle() {
@@ -66,25 +65,30 @@ class MotoclubesFragment : BaseFragment<MotoclubesFragmentPresenter>(), Motoclub
 
     override fun onLoadMotoclubes(motoclubes: MutableList<Item>) {
 
-        val adapter = ListAdapter(motoclubes)
+        if (this.adapter == null) {
+            this.adapter = ListAdapter(motoclubes)
 
-        adapter.onItemClickListener = {
+            this.adapter!!.onItemClickListener = {
 
-            val intent = Intent(context, MotoclubeActivity::class.java)
-            intent.putExtra("id", it.id)
-            intent.putExtra("readOnly", true)
-            startActivity(intent)
-        }
-
-        if (UserCacheRepository.currentUser!!.motoclubeRef == null) {
-            adapter.onSwipeListener = {
-                presenter.requestEntrance(it.id!!)
+                val intent = Intent(context, MotoclubeActivity::class.java)
+                intent.putExtra("id", it.id)
+                intent.putExtra("readOnly", true)
+                startActivity(intent)
             }
-        }
 
-        val recyclerView = view?.findViewById<RecyclerView>(R.id.recycler_list)
-        recyclerView?.adapter = adapter
-        recyclerView?.layoutManager = LinearLayoutManager(view?.context)
+            if (UserCacheRepository.currentUser!!.motoclubeRef == null) {
+                this.adapter!!.onSwipeListener = {
+                    presenter.requestEntrance(it.id!!)
+                }
+            }
+
+            val recyclerView = view?.findViewById<RecyclerView>(R.id.recycler_list)
+            recyclerView?.adapter = adapter
+            recyclerView?.layoutManager = LinearLayoutManager(view?.context)
+        }
+        else {
+            this.adapter!!.add(motoclubes)
+        }
 
         refresh_layout.isRefreshing = false
     }

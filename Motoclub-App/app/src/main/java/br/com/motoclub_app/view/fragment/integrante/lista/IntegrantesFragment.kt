@@ -19,6 +19,8 @@ import kotlinx.android.synthetic.main.fragment_list.*
 
 class IntegrantesFragment : BaseFragment<IntegrantesPresenter>(), IntegrantesView {
 
+    private var adapter: ListAdapter? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -29,13 +31,20 @@ class IntegrantesFragment : BaseFragment<IntegrantesPresenter>(), IntegrantesVie
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        refresh_layout.setOnRefreshListener { presenter.loadIntegrantes() }
-        list_fab.setOnClickListener { startActivity(Intent(view.context, UserActivity::class.java)) }
+        refresh_layout.setOnRefreshListener { presenter.loadIntegrantes(this.adapter?.last()) }
+        list_fab.setOnClickListener {
+            startActivity(
+                Intent(
+                    view.context,
+                    UserActivity::class.java
+                )
+            )
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        presenter.loadIntegrantes()
+        presenter.loadIntegrantes(this.adapter?.last())
     }
 
     override fun setTitle() {
@@ -44,19 +53,24 @@ class IntegrantesFragment : BaseFragment<IntegrantesPresenter>(), IntegrantesVie
 
     override fun onLoadIntegrantes(integrantes: MutableList<Item>) {
 
-        val adapter = ListAdapter(integrantes)
+        if (this.adapter == null) {
 
-        adapter.onItemClickListener = {
+            this.adapter = ListAdapter(integrantes)
+            this.adapter!!.onItemClickListener = {
 
-            val intent = Intent(context, UserActivity::class.java)
-            intent.putExtra("id", it.id)
-            intent.putExtra("readOnly", true)
-            startActivity(intent)
+                val intent = Intent(context, UserActivity::class.java)
+                intent.putExtra("id", it.id)
+                intent.putExtra("readOnly", true)
+                startActivity(intent)
+            }
+
+            val recyclerView = view?.findViewById<RecyclerView>(R.id.recycler_list)
+            recyclerView?.adapter = adapter
+            recyclerView?.layoutManager = LinearLayoutManager(view?.context)
+
+        } else {
+            this.adapter!!.add(integrantes)
         }
-
-        val recyclerView = view?.findViewById<RecyclerView>(R.id.recycler_list)
-        recyclerView?.adapter = adapter
-        recyclerView?.layoutManager = LinearLayoutManager(view?.context)
 
         refresh_layout?.isRefreshing = false
     }

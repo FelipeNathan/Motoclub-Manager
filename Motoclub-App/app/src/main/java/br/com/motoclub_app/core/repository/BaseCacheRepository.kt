@@ -32,19 +32,11 @@ abstract class BaseCacheRepository<Model : BaseModel> : Repository<Model> {
 
         val modelList: MutableList<Model> = loadAll() ?: mutableListOf()
 
-        if (model.id == null) {
+        val u = findById(model.id!!)
 
-            if (modelList.isEmpty()) {
-                model.id = ""
-            } else {
-                model.id = modelList[modelList.size - 1].id!! + 1
-            }
-
+        if (u == null) {
             modelList.add(model)
         } else {
-
-            val u = findById(model.id!!)
-
             modelList[modelList.indexOf(u)] = model
         }
 

@@ -19,7 +19,6 @@ class LoginActivity : BaseActivity<LoginPresenter>(), LoginView, View.OnClickLis
 
         setContentView(R.layout.activity_login)
 
-        presenter.onCreate()
         btn_login.setOnClickListener(this)
         txt_create_account.setOnClickListener(this)
     }
@@ -28,10 +27,6 @@ class LoginActivity : BaseActivity<LoginPresenter>(), LoginView, View.OnClickLis
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = (Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(intent)
-    }
-
-    override fun showMessage(msg: String) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
     }
 
     override fun onClick(v: View?) {

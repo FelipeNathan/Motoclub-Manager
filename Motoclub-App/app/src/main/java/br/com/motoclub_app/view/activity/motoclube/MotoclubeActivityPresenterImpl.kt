@@ -70,13 +70,20 @@ class MotoclubeActivityPresenterImpl @Inject constructor(
 
     override fun requestEntrance(mcId: String) {
 
-        val disposable = motoclubeInteractor.requestEntrance(mcId)
-            .subscribe({
-                userInteractor.setCache(UserCacheRepository.currentUser!!)
-                view.onSave()
-            }, onError)
+        try {
 
-        compositeDisposable.add(disposable)
+            val disposable = motoclubeInteractor.requestEntrance(mcId)
+            compositeDisposable.add(disposable)
+
+            userInteractor.setCache(UserCacheRepository.currentUser!!)
+            view.showMessage("Solicitação de entrada enviada")
+            view.onSave()
+
+        } catch (ex: Throwable) {
+            onError(ex)
+        }
+
+
     }
 
     override fun getUserReference(userId: String): DocumentReference =
